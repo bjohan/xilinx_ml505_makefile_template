@@ -1,0 +1,16 @@
+NET clk_in TNM_NET=input_clk;
+TIMESPEC ts_input_clk = PERIOD input_clk 30 ns HIGH 50% INPUT_JITTER 312.5ps;
+
+NET "a<1>" LOC = "U25"; #switch 1
+NET "a<0>" LOC = "AG27"; #switch 2
+NET "b<1>" LOC = "AF25"; #switch 3
+NET "b<0>" LOC = "AF26"; #switch 4
+NET "agreatb" LOC = "H18"; #switch led0s
+NET "clk_in" LOC = "AH17"; #CLK 33MHZ FPGA
+NET "rst_in" LOC = "E9"; #FPGA_CPU_RESET_B
+NET "led_1" LOC = "L18"; #GPIO_LED_1
+NET "led_2" LOC = "G15"; #GPIO_LED_2
+NET "led_3" LOC = "AD26"; #GPIO_LED_3
+NET "led_4" LOC = "G16"; #GPIO_LED_4
+
+
