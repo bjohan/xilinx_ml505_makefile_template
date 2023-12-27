@@ -53,6 +53,7 @@ architecture Behavioral of template_project_top is
 	signal cnt2 : unsigned(24 downto 0);
 	signal clk_usr : std_logic;
 	signal clk_int : std_logic;
+	signal rst : std_logic;
 begin
 	agreatb <= p0 or p1 or p2;
 	p0 <= a(1) and (not b(1));
@@ -61,10 +62,11 @@ begin
 	led_2 <= cnt(24);
 	led_3 <= '1';
 	led_4 <= cnt2(24);
+	rst <= not rst_in;
 	i_clk: clk
 	port map (
 	clkin_in => clk_in, 
-    RST_IN => '0', 
+    RST_IN => rst, 
     CLKIN_IBUFG_OUT=> clk_int, --(CLKIN_IBUFG_OUT), 
     CLKOUT0_OUT => clk_usr, 
     LOCKED_OUT => led_1

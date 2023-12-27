@@ -1,5 +1,5 @@
 NET clk_in TNM_NET=input_clk;
-TIMESPEC ts_input_clk = PERIOD input_clk 30 ns HIGH 50% INPUT_JITTER 312.5ps;
+TIMESPEC ts_input_clk = PERIOD input_clk 30.303 ns HIGH 50%; #INPUT_JITTER 312.5ps;
 
 NET "a<1>" LOC = "U25"; #switch 1
 NET "a<0>" LOC = "AG27"; #switch 2
