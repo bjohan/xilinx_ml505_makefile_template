@@ -147,10 +147,14 @@ export COREGEN_OPTS
 PAF = $(TARGET)_plan_ahead_project_init.tcl
 CGF = $(TARGET)_coregen.cgp
 
-$(TARGET).prj : $(VHDLS) $(VERILOGS)
+myhdls:
+	$(MAKE) -C myhdl vhdls
+
+$(TARGET).prj : $(VHDLS) $(VERILOGS) myhdls
 	@truncate -s0 $(TARGET).prj
 	@for i in $(VERILOGS); do echo verilog work '"'$$i'"' >> $(TARGET).prj; done
 	@for i in $(VHDLS); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
+	@for i in $(wildcard myhdl/*.vhd); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
 
 $(TARGET).xst : Makefile $(TARGET).prj
 	@truncate -s0 $(TARGET).xst
@@ -166,12 +170,12 @@ xst/projnav.tmp : xst
 	mkdir -p xst/projnav.tmp
 
 #synthesize
-$(TARGET).syr $(TARGET.ngc) : $(TARGET).xst xst xst/projnav.tmp
+$(TARGET).syr $(TARGET).ngc : $(TARGET).xst xst xst/projnav.tmp
 	$(call run_xilinx_environment,xst -intstyle ise -ifn $(TARGET).xst -ofn $(TARGET).syr)
 
 
 #translate
-$(TARGET).ngd : $(TARGET).syr $(UCF)
+$(TARGET).ngd : $(TARGET).syr $(TARGET).ngc $(UCF)
 	$(call run_xilinx_environment, ngdbuild -intstyle ise -dd _ngo -nt timestamp -uc $(UCF) -p $(PART)-$(PACKAGE)-$(SPEED) $(TARGET).ngc $(TARGET).ngd)
 
 #map

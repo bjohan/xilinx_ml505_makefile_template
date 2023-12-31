@@ -31,9 +31,17 @@ use work.all;
 --use UNISIM.VComponents.all;
 
 entity template_project_top is
-    Port ( a,b: in  STD_LOGIC_VECTOR (1 downto 0);
-			  clk_in, rst_in : in std_logic;
-           agreatb, led_1, led_2, led_3, led_4 : out  STD_LOGIC);
+    Port (  a,b: in  STD_LOGIC_VECTOR (1 downto 0);
+	    clk_in, rst_in : in std_logic;
+	    agreatb, led_1, led_2, led_3, led_4 : out  STD_LOGIC;
+            hdr_2 : out STD_LOGIC;
+            hdr_4 : out STD_LOGIC;
+            hdr_6 : out STD_LOGIC;
+            serial2_tx : out STD_LOGIC;
+	    serial2_rx : in STD_LOGIC;
+            serial1_tx : out STD_LOGIC; --Connected to db9
+	    serial1_rx : in STD_LOGIC --Connected to db9
+);
 end template_project_top;
 
 architecture Behavioral of template_project_top is
@@ -48,30 +56,108 @@ architecture Behavioral of template_project_top is
 	 );
 	 end component;
 
+	component rs232tx 
+    	port (
+        	reset: in std_logic;
+        	toTx: in unsigned(7 downto 0);
+        	txValid: in std_logic;
+        	txReadyOut: out std_logic;
+        	txBusy: out std_logic;
+        	txd: out std_logic;
+        	clk: in std_logic;
+        	baudDiv: in unsigned(23 downto 0)
+    	);
+	end component;
+
+	component rs232rx
+    	port (
+        	reset: in std_logic;
+        	rxdata: out unsigned(7 downto 0);
+        	rxValid: out std_logic;
+        	rxd: in std_logic;
+        	clk: in std_logic;
+        	baudDiv: in unsigned(23 downto 0)
+    	);
+	end component;
+
+	--constant toTx : unsigned(7 downto 0) := "01111110";--to_unsigned(65, 8);
+	signal toTx : unsigned(7 downto 0);
 	signal p0, p1, p2 : std_logic;
 	signal cnt : unsigned(24 downto 0);
 	signal cnt2 : unsigned(24 downto 0);
+	signal cnt3 : unsigned(24 downto 0);
 	signal clk_usr : std_logic;
 	signal clk_int : std_logic;
 	signal rst : std_logic;
+	signal rdy : std_logic;
+	signal bsy : std_logic;
+	signal cnt_last : std_logic;
+	signal trig : std_logic;
+	signal tx : std_logic;
+	signal dataValid : std_logic;
 begin
+	serial2_tx <= serial2_rx;
+	--serial1_tx <= serial1_rx;
+	--serial1_tx <= '0';
+	serial1_tx <= tx;
 	agreatb <= p0 or p1 or p2;
 	p0 <= a(1) and (not b(1));
 	p1 <= a(0) and (not b(1)) and (not b(0));
 	p2 <= a(1) and a(0) and (not b(0));
-	led_2 <= cnt(24);
+	led_2 <= cnt(22);
+	hdr_2 <= serial1_rx;
+	hdr_4 <= trig; 
 	led_3 <= '1';
-	led_4 <= cnt2(24);
+	led_4 <= rst;
+	hdr_6 <= tx;
 	rst <= not rst_in;
+
 	i_clk: clk
 	port map (
-	clkin_in => clk_in, 
-    RST_IN => rst, 
-    CLKIN_IBUFG_OUT=> clk_int, --(CLKIN_IBUFG_OUT), 
-    CLKOUT0_OUT => clk_usr, 
-    LOCKED_OUT => led_1
-    );
-	
+		clkin_in => clk_in, 
+    		RST_IN => rst, 
+    		CLKIN_IBUFG_OUT=> clk_int, --(CLKIN_IBUFG_OUT), 
+    		CLKOUT0_OUT => clk_usr, 
+    		LOCKED_OUT => led_1
+    	);
+
+	i_rs232tx: rs232tx 
+    	port map(
+        	reset => rst,
+        	toTx => toTx,
+        	txValid => dataValid,
+        	txReadyOut => rdy,
+		txBusy => bsy,
+        	txd => tx,
+        	clk => clk_usr,
+        	baudDiv => to_unsigned(859, 24)
+    	);
+
+	i_rs232rx: rs232rx 
+    	port map(
+        	reset => rst,
+        	rxdata => toTx,
+        	rxValid => dataValid,
+        	rxd => serial1_rx,
+        	clk => clk_usr,
+        	baudDiv => to_unsigned(859, 24)
+    	);
+
+
+p_trig : process(clk_usr)
+begin
+	if rising_edge(clk_usr) then
+		cnt3 <= cnt3+1;
+		if cnt3 = 0 then
+			trig <= '1';
+		else
+			trig <= '0';
+		end if;
+	end if;
+end process;	
+
+
+
 	
 p_counter : process(clk_usr)
 begin

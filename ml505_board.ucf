@@ -13,4 +13,12 @@ NET "led_2" LOC = "G15"; #GPIO_LED_2
 NET "led_3" LOC = "AD26"; #GPIO_LED_3
 NET "led_4" LOC = "G16"; #GPIO_LED_4
 
+NET "serial2_tx" LOC = "F10"; #FPGA_SERIAL2_TX
+NET "serial2_rx" LOC = "G10"; #FPGA_SERIAL2_TX
 
+NET "serial1_tx" LOC = "AG20";
+NET "serial1_rx" LOC = "AG15";
+
+NET "hdr_2" LOC = "H33";
+NET "hdr_4" LOC = "F34";
+NET "hdr_6" LOC = "H34";
