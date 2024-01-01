@@ -13,7 +13,7 @@ def axi4sw(reset, clk, tDataIn, tValidIn, tReadyOut_o, tDataOut,tValidOut_o, tRe
 
     @always_seq(clk.posedge, reset=reset)
     def logic():
-        if tValidIn==1 and tReadyOut==1 and (currentWord < nWide):
+        if tValidIn==1 and tReadyOut==1 and (not tValidOut) and (currentWord < nWide):
             tDataOut.next[(currentWord+1)*len(tDataIn):currentWord*len(tDataIn)] = tDataIn
             currentWord.next = currentWord+1
             if currentWord == nWide - 1:

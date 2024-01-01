@@ -1,28 +1,20 @@
 from myhdl import *
 
 
-from component_axi4sw import axi4sw
+from component_axi4sn import axi4sn
 @block
-def test_axi4sw():
+def test_axi4sn():
 
     clk = Signal(False)
     reset = ResetSignal(0, active=1, isasync=False)
     
-    tDataIn = Signal(intbv(0xAA)[8:])
+    tDataIn = Signal(intbv(0xAA)[32:])
     tValidIn = Signal(False);
     tReadyOut = Signal(False);
     
-    tDataOut = Signal(intbv(0)[32:])
+    tDataOut = Signal(intbv(0)[8:])
     tValidOut = Signal(False)
     tReadyIn = Signal(False);
-
-    transferIn = Signal(False)
-    transferOut = Signal(False)
-
-    @always_comb
-    def transfer_logic():
-        transferIn.next = tValidIn ==1 and tReadyOut == 1
-        transferOut.next = tValidOut == 1 and tReadyIn == 1
 
     @always(delay(10))
     def clkgen():
@@ -31,20 +23,30 @@ def test_axi4sw():
         else:
             clk.next = 1
 
-    axi4sw_inst = axi4sw(reset, clk, tDataIn, tValidIn, tReadyOut, tDataOut, tValidOut, tReadyIn, 4)
+    axi4sn_inst = axi4sn(reset, clk, tDataIn, tValidIn, tReadyOut, tDataOut, tValidOut, tReadyIn, 4)
 
 
     @instance
     def read():
+        print("Read process started")
         for i in range(3):
             yield clk.negedge
-        tReadyIn.next = 1
-        yield tValidOut.negedge
-        while True:
+        for i in range(10):
             if not tValidOut:
+                print("Waiting for tvalidout")
                 yield tValidOut.posedge
+                print("Got tvalidout")
             yield clk.negedge
+            tReadyIn.next = 1
+            yield clk.negedge
+            tReadyIn.next = 0
+            yield clk.negedge
+            tReadyIn.next = 1
+            yield clk.negedge
+            yield tValidOut.negedge
+            print("Waiting for tvalidout")
             yield tValidOut.posedge
+            print("Got tvalidout");
             yield tValidOut.negedge
             yield clk.negedge
             tReadyIn.next = 0;
@@ -60,29 +62,29 @@ def test_axi4sw():
         for i in range(3):
             yield clk.negedge
         print("Starting to transmit")
-        for b in [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]:
+        for b in [0xA3A2A1A0, 0xB3B2B1B0, 0xC3C2C1C0, 0xD3D2D1D0, 0xE3D2D1E0, 0xF3F2F1F0]:
+            print("Transmitting ", b)
             tDataIn.next = b
-            if not tReadyOut:
-                yield tReadyOut.posedge
-            yield clk.negedge
             tValidIn.next = 1
             yield clk.negedge
+            print("Waiting for ready")
+            for i in range(100):
+                if tReadyOut:
+                    break
+                yield clk.negedge
+           
+            else:
+                raise StopSimulation("tReadyOut not set")    
+            yield clk.negedge
             tValidIn.next = 0
-            #print("Waiting for ack")
-            #yield txReady.negedge, delay(30)
-            #if txReady:
-            #    raise StopSimulation("txValid did not deassert")
-        #print("wainting for txready")
-        #if not txReady:
-        #    yield txReady.posedge
         print("extra clocks")
         for i in range(3):
             yield clk.negedge
         print("stop simulation")
         raise StopSimulation("Simulation stopped")
 
-    return clkgen, transfer_logic, axi4sw_inst, write, read
+    return clkgen, axi4sn_inst, write, read
 
-tb = test_axi4sw();
+tb = test_axi4sn();
 tb.config_sim(trace=True)
 tb.run_sim();
