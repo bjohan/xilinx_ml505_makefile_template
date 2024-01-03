@@ -7,11 +7,11 @@ def convert_axi4sn(hdl):
     clk = Signal(False)
     reset = ResetSignal(False, active=1, isasync=False)
     
-    tDataIn = Signal(intbv(0xAA)[8:])
+    tDataIn = Signal(intbv(0xAA)[32:])
     tValidIn = Signal(False);
     tReadyOut = Signal(False);
     
-    tDataOut = Signal(intbv(0)[32:])
+    tDataOut = Signal(intbv(0)[8:])
     tValidOut = Signal(False)
     tReadyIn = Signal(False);
 

@@ -82,6 +82,7 @@ architecture Behavioral of template_project_top is
 
 	--constant toTx : unsigned(7 downto 0) := "01111110";--to_unsigned(65, 8);
 	signal toTx : unsigned(7 downto 0);
+	signal fromRx : unsigned(7 downto 0);
 	signal p0, p1, p2 : std_logic;
 	signal cnt : unsigned(24 downto 0);
 	signal cnt2 : unsigned(24 downto 0);
@@ -95,6 +96,19 @@ architecture Behavioral of template_project_top is
 	signal trig : std_logic;
 	signal tx : std_logic;
 	signal dataValid : std_logic;
+	signal testData : unsigned(31 downto 0);
+	signal testDataValid: std_logic;
+	signal testDataReady : std_logic;
+	signal testData2 : unsigned(31 downto 0);
+	signal testData2Valid: std_logic;
+	signal testData2Ready : std_logic;
+	signal toTxData : unsigned(7 downto 0);
+	signal toTxValid: std_logic;
+	signal toTxReady : std_logic;
+	signal fifoDin : std_logic_vector(35 downto 0);
+	signal fifoDout : std_logic_vector(35 downto 0);
+	signal fifoFull : std_logic;
+	signal fifoEmpty : std_logic;
 begin
 	serial2_tx <= serial2_rx;
 	--serial1_tx <= serial1_rx;
@@ -105,8 +119,10 @@ begin
 	p1 <= a(0) and (not b(1)) and (not b(0));
 	p2 <= a(1) and a(0) and (not b(0));
 	led_2 <= cnt(22);
-	hdr_2 <= serial1_rx;
-	hdr_4 <= trig; 
+	--hdr_2 <= serial1_rx;
+	hdr_2 <= testDataValid;
+	hdr_4 <= testDataReady;
+	--hdr_4 <= trig; 
 	led_3 <= '1';
 	led_4 <= rst;
 	hdr_6 <= tx;
@@ -124,9 +140,12 @@ begin
 	i_rs232tx: rs232tx 
     	port map(
         	reset => rst,
-        	toTx => toTx,
-        	txValid => dataValid,
-        	txReadyOut => rdy,
+		toTx => toTxData,
+		txValid => toTxValid,
+		txReadyOut => toTxReady,
+        	--toTx => toTx,
+        	--txValid => dataValid,
+        	--txReadyOut => rdy,
 		txBusy => bsy,
         	txd => tx,
         	clk => clk_usr,
@@ -136,13 +155,65 @@ begin
 	i_rs232rx: rs232rx 
     	port map(
         	reset => rst,
-        	rxdata => toTx,
+        	rxdata => fromRx,
         	rxValid => dataValid,
         	rxd => serial1_rx,
         	clk => clk_usr,
         	baudDiv => to_unsigned(859, 24)
     	);
 
+	i_axi4sw: entity work.axi4sw
+	port map(
+		reset => rst,
+        	clk => clk_usr,
+        	tDataIn => fromRx,
+        	tValidIn => dataValid,
+        	--tReadyOut_o => ;
+        	tDataOut => testData,
+        	tValidOut_o => testDataValid,
+        	tReadyIn => testDataReady
+	);
+
+
+	fifoDin(31 downto 0) <= std_logic_vector(testData);
+	fifoDin(35 downto 32) <= "0000";
+	serial_fifo : entity work.fifo_generator_v9_3
+  	PORT MAP (
+    		clk => clk_usr,
+    		srst => rst,
+		--din(35 downto 0) => (others => '0'),
+    		--din(31 downto 0) => std_logic_vector(testData),
+		--din => (31 downto 0 => std_logic_vector(testData), others => '0'),
+		din => fifoDin,
+    		wr_en => testDataValid,
+    		rd_en => testData2Ready,
+		dout => fifoDout,
+    		--dout(31 downto 0) => std_logic_vector(testData2),
+    		--full => not testData2Ready,
+		full => fifoFull,
+    		--almost_full => almost_full,
+    		--empty => not testData2Valid
+		empty => fifoEmpty
+    		--almost_empty => almost_empty
+  	);
+
+	testData2 <= unsigned(fifoDout(31 downto 0));
+	testDataReady <= not fifoFull;
+	testData2Valid <= not fifoEmpty;
+
+	i_axi4sn: entity work.axi4sn
+	port map(
+		reset => rst,
+        	clk => clk_usr,
+        	tDataIn => testData2,
+        	tValidIn => testData2Valid,
+        	tReadyOut_o => testData2Ready,
+        	tDataOut => toTxData,
+        	tValidOut_o => toTxValid,
+        	tReadyIn => toTxReady
+
+
+	);
 
 p_trig : process(clk_usr)
 begin
