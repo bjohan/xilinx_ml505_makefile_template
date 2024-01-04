@@ -22,9 +22,6 @@ UCF = ml505_board.ucf
 TARGET = output
 TOP = template_project_top
 
-brr:
-	echo $(COREGEN_NAMES)
-
 define XST_SYNTH_OPTS
 -ifn $(TARGET).prj
 -ifmt mixed
