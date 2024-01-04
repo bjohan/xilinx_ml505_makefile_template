@@ -147,14 +147,18 @@ export COREGEN_OPTS
 PAF = $(TARGET)_plan_ahead_project_init.tcl
 CGF = $(TARGET)_coregen.cgp
 
+coregen_generate:
+	$(MAKE) -C coregen_files all
+
 myhdls:
 	$(MAKE) -C myhdl vhdls
 
-$(TARGET).prj : $(VHDLS) $(VERILOGS) myhdls
+$(TARGET).prj : $(VHDLS) $(VERILOGS) myhdls coregen_generate
 	@truncate -s0 $(TARGET).prj
 	@for i in $(VERILOGS); do echo verilog work '"'$$i'"' >> $(TARGET).prj; done
 	@for i in $(VHDLS); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
 	@for i in $(wildcard myhdl/*.vhd); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
+	@for i in $(wildcard coregen_files/*.vhd); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
 
 $(TARGET).xst : Makefile $(TARGET).prj
 	@truncate -s0 $(TARGET).xst
@@ -176,7 +180,7 @@ $(TARGET).syr $(TARGET).ngc : $(TARGET).xst xst xst/projnav.tmp
 
 #translate
 $(TARGET).ngd : $(TARGET).syr $(TARGET).ngc $(UCF)
-	$(call run_xilinx_environment, ngdbuild -intstyle ise -dd _ngo -nt timestamp -uc $(UCF) -p $(PART)-$(PACKAGE)-$(SPEED) $(TARGET).ngc $(TARGET).ngd)
+	$(call run_xilinx_environment, ngdbuild -sd coregen_files -intstyle ise -dd _ngo -nt timestamp -uc $(UCF) -p $(PART)-$(PACKAGE)-$(SPEED) $(TARGET).ngc $(TARGET).ngd)
 
 #map
 $(TARGET)_map.ncd : $(TARGET).ngd
@@ -230,3 +234,6 @@ clean:
 	rm -f $(TARGET).prj $(TARGET).xst $(TARGET).syr $(TARGET).ngc $(TARGET).bld $(TARGET).ngd $(TARGET).ngr $(TARGET)_xst.xrpt $(TARGET)_ngdbuild.xrpt $(TARGET)_map.map  $(TARGET)_map.mrp $(TARGET)_map.ncd $(TARGET)_map.ngm $(TARGET).pcf $(TARGET)_summary.xml $(TARGET)_usage.xml $(TARGET).ncd $(TARGET).pad $(TARGET).par $(TARGET).ptwx $(TARGET).unroutes $(TARGET).xpi $(TARGET)_pad.csv $(TARGET)_pad.txt $(TARGET).bgn $(TARGET).bit $(TARGET).drc $(TARGET).ut usage_statistics_webtalk.html webtalk.log $(TARGET)_bitgen.xwbt $(TARGET).twr $(TARGET).twx $(TARGET)_plan_ahead_project_init.tcl planAhead.jou planAhead.log
 	rm -rf xlnx_auto_0_xdb xst/projnav.tmp xst _xmsgs _ngo
 	rm -f *.lso *.xrpt
+	$(MAKE) -C myhdl clean
+	$(MAKE) -C coregen_files clean
+	
