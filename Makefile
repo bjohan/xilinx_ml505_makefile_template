@@ -152,9 +152,6 @@ export COREGEN_OPTS
 PAF = $(TARGET)_plan_ahead_project_init.tcl
 CGF = $(TARGET)_coregen.cgp
 
-coregen_generate:
-	$(MAKE) -C coregen_files all
-
 myhdl/%.vhd: myhdl/component_%.py myhdl/generate_vhdl_%.py
 	$(MAKE) -C myhdl $(@F)
 
