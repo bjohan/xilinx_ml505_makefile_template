@@ -13,9 +13,17 @@ PACKAGE=ff1136
 VHDLS = $(wildcard *.vhdl) $(wildcard *.vhd)
 VERILOGS = $(wildcard *.v)
 
+MYHDL_NAMES = $(basename $(patsubst myhdl/component_%, myhdl/%, $(wildcard myhdl/component_*.py)))
+MYHDL_GEN = $(addsuffix .vhd, $(MYHDL_NAMES)) myhdl/pck_myhdl_011.vhd
+COREGEN_NAMES = $(basename  $(wildcard coregen_files/*.cgp))
+COREGEN_GEN = $(addsuffix .vhd, $(COREGEN_NAMES))
+
 UCF = ml505_board.ucf
 TARGET = output
 TOP = template_project_top
+
+brr:
+	echo $(COREGEN_NAMES)
 
 define XST_SYNTH_OPTS
 -ifn $(TARGET).prj
@@ -150,15 +158,18 @@ CGF = $(TARGET)_coregen.cgp
 coregen_generate:
 	$(MAKE) -C coregen_files all
 
-myhdls:
-	$(MAKE) -C myhdl vhdls
+myhdl/%.vhd: myhdl/component_%.py myhdl/generate_vhdl_%.py
+	$(MAKE) -C myhdl $(@F)
 
-$(TARGET).prj : $(VHDLS) $(VERILOGS) myhdls coregen_generate
+coregen_files/%.vhd: coregen_files/%.cgp coregen_files/%.xco
+	$(MAKE) -C coregen_files $(@F)
+
+$(TARGET).prj : $(VHDLS) $(VERILOGS) $(MYHDL_GEN) $(COREGEN_GEN)
 	@truncate -s0 $(TARGET).prj
 	@for i in $(VERILOGS); do echo verilog work '"'$$i'"' >> $(TARGET).prj; done
 	@for i in $(VHDLS); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
-	@for i in $(wildcard myhdl/*.vhd); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
-	@for i in $(wildcard coregen_files/*.vhd); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
+	@for i in $(MYHDL_GEN); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
+	@for i in $(COREGEN_GEN); do echo vhdl work '"'$$i'"' >> $(TARGET).prj; done
 
 $(TARGET).xst : Makefile $(TARGET).prj
 	@truncate -s0 $(TARGET).xst
