@@ -8,12 +8,14 @@ def test_axi4s_skidbuf():
     reset = ResetSignal(0, active=1, isasync=False)
     
     tDataIn = Signal(intbv(0xAA)[32:])
-    tValidIn = Signal(False);
-    tReadyOut = Signal(False);
+    tValidIn = Signal(False)
+    tReadyOut = Signal(False)
+    tLastIn = Signal(False)
     
     tDataOut = Signal(intbv(0)[32:])
     tValidOut = Signal(False)
-    tReadyIn = Signal(False);
+    tReadyIn = Signal(False)
+    tLastOut = Signal(False)
 
     transferIn = Signal(False)
     transferOut = Signal(False)
@@ -30,7 +32,7 @@ def test_axi4s_skidbuf():
         else:
             clk.next = 1
 
-    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, tDataIn, tValidIn, tReadyOut, tDataOut, tValidOut, tReadyIn)
+    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut)
 
     @instance
     def monitor():
@@ -70,6 +72,10 @@ def test_axi4s_skidbuf():
         for b in [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]:
             tValidIn.next = 1
             tDataIn.next = b
+            if b in [0xA3, 0xB3, 0xC3]:
+                tLastIn.next = 1
+            else:
+                tLastIn.next = 0
             yield clk.negedge
             if not tReadyOut:
                 yield tReadyOut.posedge

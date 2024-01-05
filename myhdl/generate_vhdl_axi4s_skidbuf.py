@@ -10,13 +10,15 @@ def convert_axi4s_skidbuf(hdl):
     tDataIn = Signal(intbv(0xAA)[32:])
     tValidIn = Signal(False);
     tReadyOut = Signal(False);
+    tLastIn = Signal(False);
     
     tDataOut = Signal(intbv(0)[32:])
     tValidOut = Signal(False)
     tReadyIn = Signal(False);
+    tLastOut = Signal(False);
 
 
-    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, tDataIn, tValidIn, tReadyOut, tDataOut, tValidOut, tReadyIn)
+    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut)
     axi4s_skidbuf_inst.convert(hdl=hdl);
 
 
