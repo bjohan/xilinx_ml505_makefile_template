@@ -12,18 +12,22 @@ def simulation_axi4s_cascade():
     tDataIn = Signal(intbv(0xAA)[32:])
     tValidIn = Signal(False)
     tReadyOut = Signal(False)
+    tLastIn = Signal(False)
 
     tData1 = Signal(intbv(0)[8:])
     tValid1 = Signal(False)
     tReady1 = Signal(False)
+    tLast1 = Signal(False)
 
     tData2 = Signal(intbv(0)[32:])
     tValid2 = Signal(False)
     tReady2 = Signal(False)
+    tLast2 = Signal(False)
 
     tDataOut = Signal(intbv(0)[8:])
     tValidOut = Signal(False)
     tReadyIn = Signal(True)
+    tLastOut = Signal(False)
 
     transfer_in = Signal(False)
     transfer_1 = Signal(False)
@@ -44,10 +48,10 @@ def simulation_axi4s_cascade():
         else:
             clk.next = 1
 
-    axi4sn1_inst = axi4sn(reset, clk, tDataIn, tValidIn, tReadyOut, tData1, tValid1, tReady1, 4)
+    axi4sn1_inst = axi4sn(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tData1, tValid1, tReady1, tLast1, 4)
 
     axi4sw1_inst = axi4sw(reset, clk, tData1, tValid1, tReady1, tData2, tValid2, tReady2, 4)
-    axi4sn2_inst = axi4sn(reset, clk, tData2, tValid2, tReady2, tDataOut, tValidOut, tReadyIn, 4)
+    axi4sn2_inst = axi4sn(reset, clk, tData2, tValid2, tReady2, tLast2, tDataOut, tValidOut, tReadyIn, tLastOut, 4)
 
 
     @instance

@@ -9,12 +9,14 @@ def test_axi4sn():
     reset = ResetSignal(0, active=1, isasync=False)
     
     tDataIn = Signal(intbv(0xAA)[32:])
-    tValidIn = Signal(False);
-    tReadyOut = Signal(False);
+    tValidIn = Signal(False)
+    tReadyOut = Signal(False)
+    tLastIn = Signal(False)
     
     tDataOut = Signal(intbv(0)[8:])
     tValidOut = Signal(False)
-    tReadyIn = Signal(False);
+    tReadyIn = Signal(False)
+    tLastOut = Signal(False)
 
     @always(delay(10))
     def clkgen():
@@ -23,7 +25,7 @@ def test_axi4sn():
         else:
             clk.next = 1
 
-    axi4sn_inst = axi4sn(reset, clk, tDataIn, tValidIn, tReadyOut, tDataOut, tValidOut, tReadyIn, 4)
+    axi4sn_inst = axi4sn(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut, 4)
 
 
     @instance
@@ -65,6 +67,11 @@ def test_axi4sn():
         for b in [0xA3A2A1A0, 0xB3B2B1B0, 0xC3C2C1C0, 0xD3D2D1D0, 0xE3D2D1E0, 0xF3F2F1F0]:
             print("Transmitting ", b)
             tDataIn.next = b
+            if b in [0xB3B2B1B0, 0xE3D2D1E0]:
+                tLastIn.next = 1
+            else:
+                tLastIn.next = 0
+
             tValidIn.next = 1
             yield clk.negedge
             print("Waiting for ready")
