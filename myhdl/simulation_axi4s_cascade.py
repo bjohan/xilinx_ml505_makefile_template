@@ -50,7 +50,7 @@ def simulation_axi4s_cascade():
 
     axi4sn1_inst = axi4sn(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tData1, tValid1, tReady1, tLast1, 4)
 
-    axi4sw1_inst = axi4sw(reset, clk, tData1, tValid1, tReady1, tData2, tValid2, tReady2, 4)
+    axi4sw1_inst = axi4sw(reset, clk, tData1, tValid1, tReady1, tLast1, tData2, tValid2, tReady2, tLast2, 4)
     axi4sn2_inst = axi4sn(reset, clk, tData2, tValid2, tReady2, tLast2, tDataOut, tValidOut, tReadyIn, tLastOut, 4)
 
 
@@ -87,6 +87,10 @@ def simulation_axi4s_cascade():
         print("Starting to transmit")
         for b in [0xA3A2A1A0, 0xB3B2B1B0, 0xC3C2C1C0, 0xD3D2D1D0, 0xE3D2D1E0, 0xF3F2F1F0]:
             print("Transmitting ", b)
+            if b == 0xB3B2B1B0:
+                tLastIn.next = 1
+            else:
+                tLastIn.next = 0
             tDataIn.next = b
             tValidIn.next = 1
             yield clk.negedge

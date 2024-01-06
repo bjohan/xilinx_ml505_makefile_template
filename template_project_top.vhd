@@ -168,6 +168,7 @@ begin
         	clk => clk_usr,
         	tDataIn => fromRx,
         	tValidIn => dataValid,
+		tLastIn => '0',
         	--tReadyOut_o => ;
         	tDataOut => testData,
         	tValidOut_o => testDataValid,
@@ -208,6 +209,7 @@ begin
         	tDataIn => testData2,
         	tValidIn => testData2Valid,
         	tReadyOut_o => testData2Ready,
+		tLastIn => '0',
         	tDataOut => toTxData,
         	tValidOut_o => toTxValid,
         	tReadyIn => toTxReady

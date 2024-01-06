@@ -9,12 +9,14 @@ def test_axi4sw():
     reset = ResetSignal(0, active=1, isasync=False)
     
     tDataIn = Signal(intbv(0xAA)[8:])
-    tValidIn = Signal(False);
-    tReadyOut = Signal(False);
+    tValidIn = Signal(False)
+    tReadyOut = Signal(False)
+    tLastIn = Signal(False)
     
     tDataOut = Signal(intbv(0)[32:])
     tValidOut = Signal(False)
-    tReadyIn = Signal(False);
+    tReadyIn = Signal(False)
+    tLastOut = Signal(False)
 
     transferIn = Signal(False)
     transferOut = Signal(False)
@@ -31,7 +33,7 @@ def test_axi4sw():
         else:
             clk.next = 1
 
-    axi4sw_inst = axi4sw(reset, clk, tDataIn, tValidIn, tReadyOut, tDataOut, tValidOut, tReadyIn, 4)
+    axi4sw_inst = axi4sw(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut, 4)
 
 
     @instance
@@ -61,6 +63,10 @@ def test_axi4sw():
             yield clk.negedge
         print("Starting to transmit")
         for b in [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]:
+            if b == 0xB3:
+                tLastIn.next = 1
+            else:
+                tLastIn.next = 0
             tDataIn.next = b
             if not tReadyOut:
                 yield tReadyOut.posedge
