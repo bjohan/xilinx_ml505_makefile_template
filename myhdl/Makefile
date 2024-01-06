@@ -4,12 +4,11 @@ NAMES_WITH_SUFFIX = $(patsubst test_%,% ,$(COMPONENTS))
 VHDLS = $(patsubst %.py, %.vhd, $(NAMES_WITH_SUFFIX))
 SIMULATION_SOURCES = $(wildcard simulation_*.py)
 SIMULATIONS = $(SIMULATION_SOURCES:.py=.vcd)
-PYTHON = pyenv/bin/python3
+PYTHON = ./pyenv/bin/python3
 
-pyenv: 
+
+$(PYTHON):
 	mkdir -p pyenv
-
-$(PYTHON): pyenv
 	python3 -m venv pyenv
 	pyenv/bin/pip install git+https://github.com/myhdl/myhdl.git@master
 
