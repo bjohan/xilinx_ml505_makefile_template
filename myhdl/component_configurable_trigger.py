@@ -12,7 +12,7 @@ def configurable_trigger(dataIn, andMask, orMask, triggedAnd, triggedOr):
 
     @always_comb
     def trig_or():
-        x = dataIn[0] and  orMask[0]
+        x = dataIn[0] or  orMask[0]
         for i in range(1, len(dataIn)):
             x = x or (dataIn[i] and orMask[i])
         triggedOr.next = x
