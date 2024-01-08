@@ -50,7 +50,7 @@ def test_deescaper():
     @instance
     def monitor():
         for i in range(100):
-            yield clk.negedge;
+            yield clk.posedge;
         raise StopSimulation("Ending simulations after 100 cycles");
 
 
@@ -59,7 +59,7 @@ def test_deescaper():
         yield reset.posedge;
         for data, last, delay in zip(dataToReceive, writeLast, readDelays):
             tReadyIn.next = 0
-            yield clk.negedge
+            yield clk.posedge
             for i in range(delay):
                 yield clk.posedge
             tReadyIn.next = 1
@@ -75,7 +75,7 @@ def test_deescaper():
     def write():
         reset.next = 1
         for i in range(3):
-            yield clk.negedge
+            yield clk.posedge
         reset.next = 0
         for i in range(3):
             yield clk.posedge
@@ -86,16 +86,16 @@ def test_deescaper():
             tLastIn.next = last
             for i in range(delay):
                 yield clk.posedge
-            yield clk.negedge
+            yield clk.posedge
             tValidIn.next = 1
             if not transferIn:
                 tick.next = 1
                 yield transferIn.posedge
                 tick.next = 0
-                #yield clk.negedge
+                #yield clk.posedge
             yield clk.posedge
         for i in range(3):
-            yield clk.negedge
+            yield clk.posedge
         raise StopSimulation("Simulation stopped")
 
     return clkgen, transfer_logic, deescaper_inst, write, read, monitor 
