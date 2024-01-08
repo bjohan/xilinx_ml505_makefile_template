@@ -4,7 +4,7 @@ from component_axi4s_skidbuf import axi4s_skidbuf
 t_State = enum('S_TRANSFER', 'ESCAPE');
 
 @block
-def escaper(reset, clk, 
+def deescaper(reset, clk, 
         tDataIn, tValidIn, tReadyOut_o, tLastIn,
         tDataOut, tValidOut_o, tReadyIn, tLastOut,
         escapeCode):
@@ -17,7 +17,7 @@ def escaper(reset, clk,
     tLastBuf = Signal(False)
     state = Signal(t_State.S_TRANSFER)
 
-    transfer = Signal(False)
+    transfer = Signal(True)
     
  
     @always_comb
@@ -37,7 +37,9 @@ def escaper(reset, clk,
                 tLastOut.next = tLastIn
             
         else:
+            #tReadyIn.next = 0
             tReadyOut.next = 0
+            tValidOut.next = 1
             tDataOut.next = escapeCode;
             tLastOut.next = tLastBuf;
         

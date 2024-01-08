@@ -34,5 +34,7 @@ all: tests vhdls simulations
 
 clean:
 	rm -f $(VCDS) $(VHDLS) $(SIMULATIONS) pck_myhdl_011.vhd
+
+clean_pyenv:
 	rm -rf pyenv
 	
