@@ -24,7 +24,7 @@ def escaper(reset, clk,
     def out_reg():
         tValidOut_o.next = tValidOut
         tReadyOut_o.next = tReadyOut
-        transferIn.next = tValidOut and tReadyOut
+        transferIn.next = tValidIn and tReadyOut
         transferOut.next = tValidOut and tReadyIn
 
     @always_comb
