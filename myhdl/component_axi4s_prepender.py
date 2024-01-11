@@ -6,7 +6,7 @@ t_State = enum('S_IDLE', 'S_PREPEND', 'S_TRANSFER');
 @block
 def axi4s_prepender(reset, clk, 
         tDataIn, tValidIn, tReadyOut_o, tLastIn,
-        tDataOut, tValidOut_o, tReadyIn, tLastOut,
+        tDataOut, tValidOut_o, tReadyIn, tLastOut_o,
         prep):
 
     tReadyOut = Signal(False)
@@ -17,11 +17,13 @@ def axi4s_prepender(reset, clk,
     transfer = Signal(False)
     num = Signal(intbv(0, min = 0, max = len(prep)/len(tDataIn)+1));
     tValidInt = Signal(False)
+    tLastOut = Signal(False)
  
     @always_comb
     def out_reg():
         tValidOut_o.next = tValidOut
         tReadyOut_o.next = tReadyOut
+        tLastOut_o.next = tLastOut
         transferOut.next = tValidOut and tReadyIn
 
     @always_comb
