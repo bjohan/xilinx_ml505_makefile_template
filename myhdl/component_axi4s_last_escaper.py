@@ -4,9 +4,8 @@ from component_axi4s_skidbuf import axi4s_skidbuf
 t_State = enum('S_TRANSFER', 'S_ESCAPE', 'S_ESC_LAST', 'S_END_LAST', 'S_ESCAPE_TRANSFER_LAST','S_TRANSFER_LAST');
 
 @block
-def axi4s_last_escaper(reset, clk, 
-        tDataIn, tValidIn, tReadyOut_o, tLastIn,
-        tDataOut_o, tValidOut_o, tReadyIn,
+def axi4s_last_escaper(reset, clk,
+        i, o,
         esc, end):
 
     tReadyOut = Signal(False)
@@ -16,24 +15,24 @@ def axi4s_last_escaper(reset, clk,
 
     transfer = Signal(True)
     tValidInt = Signal(False)
-    tDataOutInt = Signal(intbv(0)[len(tDataIn):])
-    tDataOut = Signal(intbv(0)[len(tDataIn):])
+    tDataOutInt = Signal(intbv(0)[len(i.data):])
+    tDataOut = Signal(intbv(0)[len(i.data):])
     
  
     @always_comb
     def out_reg():
-        tDataOut_o.next = tDataOut
-        tValidOut_o.next = tValidOut
-        tReadyOut_o.next = tReadyOut
-        transferOut.next = tValidOut and tReadyIn
+        o.data.next = tDataOut
+        o.valid.next = tValidOut
+        i.ready.next = tReadyOut
+        transferOut.next = tValidOut and o.ready
 
     @always_comb
     def bypass_transfer():
-        if (transfer and not tLastIn) or (state == t_State.S_TRANSFER_LAST):
-            tDataOut.next = tDataIn;
-            tValidOut.next = tValidIn;
-            tReadyOut.next = tReadyIn;
-        elif transfer and tLastIn:
+        if (transfer and not i.last) or (state == t_State.S_TRANSFER_LAST):
+            tDataOut.next = i.data;
+            tValidOut.next = i.valid;
+            tReadyOut.next = o.ready;
+        elif transfer and i.last:
             tReadyOut.next = 0
             tValidOut.next = 0
             
@@ -54,7 +53,7 @@ def axi4s_last_escaper(reset, clk,
                     transfer.next = 0
                     tValidInt.next = 1
                     tDataOutInt.next = esc
-            if tLastIn and tValidIn:
+            if i.last and i.valid:
                 state.next = t_State.S_ESC_LAST;
                 transfer.next = 0
                 tDataOutInt.next = esc;
@@ -73,7 +72,7 @@ def axi4s_last_escaper(reset, clk,
 
         if state == t_State.S_END_LAST:
             if transferOut:
-                    if tDataIn == esc:
+                    if i.data == esc:
                         tDataOutInt.next = esc
                         state.next = t_State.S_ESCAPE_TRANSFER_LAST
                     else:
