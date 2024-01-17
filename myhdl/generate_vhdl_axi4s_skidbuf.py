@@ -1,4 +1,5 @@
 from myhdl import *
+from interface_axi4s import Axi4sInterface
 
 
 from component_axi4s_skidbuf import axi4s_skidbuf
@@ -7,18 +8,10 @@ def convert_axi4s_skidbuf(hdl):
     clk = Signal(False)
     reset = ResetSignal(False, active=1, isasync=False)
     
-    tDataIn = Signal(intbv(0xAA)[32:])
-    tValidIn = Signal(False);
-    tReadyOut = Signal(False);
-    tLastIn = Signal(False);
-    
-    tDataOut = Signal(intbv(0)[32:])
-    tValidOut = Signal(False)
-    tReadyIn = Signal(False);
-    tLastOut = Signal(False);
+    i = Axi4sInterface(8); 
+    o = Axi4sInterface(8); 
 
-
-    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut)
+    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, i, o)
     axi4s_skidbuf_inst.convert(hdl=hdl);
 
 

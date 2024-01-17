@@ -1,30 +1,16 @@
 from myhdl import *
-
+from interface_axi4s import Axi4sInterface
 
 from component_axi4s_skidbuf import axi4s_skidbuf
+
 @block
 def test_axi4s_skidbuf():
     clk = Signal(False)
     reset = ResetSignal(0, active=1, isasync=False)
-    
-    tDataIn = Signal(intbv(0xAA)[32:])
-    tValidIn = Signal(False)
-    tReadyOut = Signal(False)
-    tLastIn = Signal(False)
-    
-    tDataOut = Signal(intbv(0)[32:])
-    tValidOut = Signal(False)
-    tReadyIn = Signal(False)
-    tLastOut = Signal(False)
-
-    transferIn = Signal(False)
-    transferOut = Signal(False)
-
-    @always_comb
-    def transfer_logic():
-        transferIn.next = tValidIn ==1 and tReadyOut == 1
-        transferOut.next = tValidOut == 1 and tReadyIn == 1
-
+   
+    i = Axi4sInterface(8); 
+    o = Axi4sInterface(8);
+ 
     @always(delay(10))
     def clkgen():
         if clk:
@@ -32,7 +18,7 @@ def test_axi4s_skidbuf():
         else:
             clk.next = 1
 
-    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut)
+    axi4s_skidbuf_inst = axi4s_skidbuf(reset, clk, i, o)
 
     @instance
     def monitor():
@@ -42,62 +28,48 @@ def test_axi4s_skidbuf():
 
     @instance
     def read():
-        for i in range(3):
+        for j in range(3):
             yield clk.posedge
-        tReadyIn.next = 1
-        #yield tValidOut.negedge
+        o.ready.next = 1
         while True:
-            if not tValidOut:
-                yield tValidOut.posedge
+            if not o.valid:
+                yield o.valid.posedge
             yield clk.posedge
-            tReadyIn.next = 0;
-            #yield tValidOut.posedge
-            #yield tValidOut.negedge
+            o.ready.next = 0;
             yield clk.posedge
-            tReadyIn.next = 1;
-            #tReadyIn.next = 0;
+            o.ready.next = 1;
 
     @instance
     def write():
         print("Synchronous reset")
         reset.next = 1
-        for i in range(3):
+        for j in range(3):
             yield clk.posedge
         reset.next = 0
         print("Waiting 3 clks")
-        for i in range(3):
+        for j in range(3):
             yield clk.posedge
         print("Starting to transmit")
         yield clk.posedge
         for b in [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]:
-            tValidIn.next = 1
-            tDataIn.next = b
+            i.valid.next = 1
+            i.data.next = b
             if b in [0xA3, 0xB3, 0xC3]:
-                tLastIn.next = 1
+                i.last.next = 1
             else:
-                tLastIn.next = 0
+                i.last.next = 0
             yield clk.negedge
-            if not tReadyOut:
-                yield tReadyOut.posedge
-            #yield clk.posedge
+            if not i.ready:
+                yield i.ready.posedge
             yield clk.posedge
-            tValidIn.next = 1
-            #yield clk.posedge
-            #tValidIn.next = 0
-            #print("Waiting for ack")
-            #yield txReady.negedge, delay(30)
-            #if txReady:
-            #    raise StopSimulation("txValid did not deassert")
-        #print("wainting for txready")
-        #if not txReady:
-        #    yield txReady.posedge
+            i.valid.next = 1
         print("extra clocks")
-        for i in range(3):
+        for j in range(3):
             yield clk.posedge
         print("stop simulation")
         raise StopSimulation("Simulation stopped")
 
-    return clkgen, transfer_logic, axi4s_skidbuf_inst, write, read, monitor
+    return clkgen, axi4s_skidbuf_inst, write, read, monitor
 
 tb = test_axi4s_skidbuf();
 tb.config_sim(trace=True)
