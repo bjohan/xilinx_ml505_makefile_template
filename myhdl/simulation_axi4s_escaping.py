@@ -2,6 +2,7 @@ from myhdl import *
 
 from interface_axi4s import Axi4sInterface
 
+from component_axi4s_skidbuf import axi4s_skidbuf
 from component_axi4s_last_deescaper import axi4s_last_deescaper
 from component_axi4s_last_escaper import axi4s_last_escaper
 
@@ -20,34 +21,34 @@ def simulation_axi4s_escaping():
     reset = ResetSignal(0, active=1, isasync=False)
     
     i = Axi4sInterface(8);
-    c = Axi4sInterface(8, withLast=False); 
+    isk = Axi4sInterface(8);
+    c = Axi4sInterface(8); 
+    csk = Axi4sInterface(8); 
     o = Axi4sInterface(8); 
+    osk = Axi4sInterface(8); 
 
     writeWait = Signal(False)
     writeBlocked = Signal(False)
 
    
-    tDataC = Signal(intbv(0xAA)[8:])
-    tValidC = Signal(False)
-    tReadyC = Signal(False)
     
-    transferIn = Signal(False)
-    transferOut = Signal(False)
     lastOutMarker = Signal(False)
-    tick = Signal(False)
     readRef = Signal(intbv(0)[8:])
 
     frameError = Signal(False)
 
     readMark = Signal(False)
 
+    axi4s_isk = axi4s_skidbuf(reset, clk, i, isk)
     axi4s_last_escaper_inst = axi4s_last_escaper(reset, clk, 
-        i, c,
+        isk, c,
         0xc0, 0x03)
 
+    axi4s_csk = axi4s_skidbuf(reset, clk, c, csk)
     axi4s_last_deescaper_inst = axi4s_last_deescaper(reset, clk, 
-        c, o,  
+        csk, o,  
         frameError, 0xc0, 0x03)
+    axi4s_osk = axi4s_skidbuf(reset, clk, o, osk)
 
     @always(delay(10))
     def clkgen():
@@ -70,19 +71,19 @@ def simulation_axi4s_escaping():
         for data, last, delay in zip(dataToRead, readLast, readDelays):
             lastOutMarker.next = last
             readRef.next = data
-            o.ready.next = 0
+            osk.ready.next = 0
             for j in range(delay):
                 yield clk.posedge
-            o.ready.next = 1
+            osk.ready.next = 1
             readMark.next = 1
             yield clk.posedge
-            while not o.transacts():
+            while not osk.transacts():
                 yield clk.posedge
-            print("Received", o.data, " referece value ", intbv(data), " result:", o.data == data, "Last correct: ", last == o.last)
+            print("Received", osk.data, " referece value ", intbv(data), " result:", osk.data == data, "Last correct: ", last == osk.last)
             readMark.next = 0
             if last:
                 print()
-        o.ready.next = 0;
+        osk.ready.next = 0;
         raise StopSimulation("Simulation stopped")
 
     @instance
@@ -111,7 +112,7 @@ def simulation_axi4s_escaping():
         for j in range(3):
             yield clk.posedge
 
-    return clkgen, axi4s_last_deescaper_inst, axi4s_last_escaper_inst, write, read, monitor
+    return clkgen, axi4s_isk, axi4s_osk, axi4s_csk, axi4s_last_deescaper_inst, axi4s_last_escaper_inst, write, read, monitor
 
 tb = simulation_axi4s_escaping();
 tb.config_sim(trace=True)
