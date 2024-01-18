@@ -6,9 +6,9 @@ from component_axi4s_skidbuf import axi4s_skidbuf
 from component_axi4s_last_deescaper import axi4s_last_deescaper
 from component_axi4s_last_escaper import axi4s_last_escaper
 
-dataToRead = [   0xA0, 0xA1, 0xC0, 0xA3, 0xB0, 0xB1,                             0xB2, 0xB3, 0xC0,                                       0xC0, 0xE2,             0xE3,                      0xc0,     0xA0, 0xA1, 0xA2, 0xA3, 0xA4]
-readDelays = [   0,    0,    0,    0,    0,    0,                                0,    0,    0,                                          0,    0,                0,                        0,          0,    0,    0,    0,    0]
-readLast   = [   0,    0,    0,    0,    0,    1,                                0,    0,    1,                                          0,    0,                1,                        1,          0,    0,    0,    0,    1]
+dataToRead = [   0xA0, 0xA1, 0xC0, 0xA3, 0xB0, 0xB1,                             0xB2, 0xB3, 0xC0,                                       0xC0, 0xE2,             0xE3,                      0xc0,     0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xa5, 0xa6, 0xa7, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf]
+readDelays = [   0,    0,    0,    0,    0,    0,                                0,    0,    0,                                          0,    0,                0,                        0,          0,    0,    0,    0,    0,   0,    0,    0,    0,    0,    0,    0,    0,    0,   0]
+readLast   = [   0,    0,    0,    0,    0,    1,                                0,    0,    1,                                          0,    0,                1,                        1,          0,    0,    0,    0,    0,   0,    0,    0,    0,    0,    0,    0,    0,    0,    1]
 
 dataToWrite = dataToRead
 writeDelays = readDelays
