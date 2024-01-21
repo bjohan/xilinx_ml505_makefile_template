@@ -2,7 +2,6 @@ from myhdl import *
 from interface_axi4s import Axi4sInterface
 
 from component_axi4s_unpacker import axi4s_unpacker
-from my_array import MyArray
 
 def convert_axi4s_unpacker(hdl):
     clk = Signal(False)
