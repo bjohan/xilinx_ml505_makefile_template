@@ -59,7 +59,3 @@ def test_dpram():
 tb = test_dpram();
 tb.config_sim(trace=True)
 tb.run_sim();
-#traceSignals.name = "test_rs232tx"
-#t = traceSignals(test_rs232tx)
-#sim = Simulation(t)
-#sim.run()
