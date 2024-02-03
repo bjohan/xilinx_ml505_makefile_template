@@ -11,7 +11,7 @@ def convert_fifo(hdl):
     ready = Signal(False)
     valid = Signal(False)
     re = Signal(False)
-    nWords = 1024*8;
+    nWords = 1024;
     fifo_inst = fifo(reset, clk, din, we, ready, dout, re, valid, nWords)
     fifo_inst.convert(hdl=hdl);
 
