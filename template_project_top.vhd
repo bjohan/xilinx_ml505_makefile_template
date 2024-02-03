@@ -105,8 +105,10 @@ architecture Behavioral of template_project_top is
 	signal toTxData : unsigned(7 downto 0);
 	signal toTxValid: std_logic;
 	signal toTxReady : std_logic;
-	signal fifoDin : std_logic_vector(35 downto 0);
-	signal fifoDout : std_logic_vector(35 downto 0);
+	--signal fifoDin : std_logic_vector(35 downto 0);
+	--signal fifoDout : std_logic_vector(35 downto 0);
+	signal fifoDin : unsigned(35 downto 0);
+	signal fifoDout : unsigned(35 downto 0);
 	signal fifoFull : std_logic;
 	signal fifoEmpty : std_logic;
 begin
@@ -176,31 +178,23 @@ begin
 	);
 
 
-	fifoDin(31 downto 0) <= std_logic_vector(testData);
+	fifoDin(31 downto 0) <= testData;
 	fifoDin(35 downto 32) <= "0000";
-	serial_fifo : entity work.fifo_generator_v9_3
-  	PORT MAP (
-    		clk => clk_usr,
-    		srst => rst,
-		--din(35 downto 0) => (others => '0'),
-    		--din(31 downto 0) => std_logic_vector(testData),
-		--din => (31 downto 0 => std_logic_vector(testData), others => '0'),
-		din => fifoDin,
-    		wr_en => testDataValid,
-    		rd_en => testData2Ready,
-		dout => fifoDout,
-    		--dout(31 downto 0) => std_logic_vector(testData2),
-    		--full => not testData2Ready,
-		full => fifoFull,
-    		--almost_full => almost_full,
-    		--empty => not testData2Valid
-		empty => fifoEmpty
-    		--almost_empty => almost_empty
-  	);
 
-	testData2 <= unsigned(fifoDout(31 downto 0));
-	testDataReady <= not fifoFull;
-	testData2Valid <= not fifoEmpty;
+    i_fifo: entity work.fifo
+    port map(
+        reset => rst,
+        clk => clk_usr,
+        din => fifoDin,
+        we => testDataValid,
+        ready_o => testDataReady,
+        dout => fifoDout,
+        re => testData2Ready,
+        valid_o => testData2Valid
+    );
+    
+
+	testData2 <= fifoDout(31 downto 0);
 
 	i_axi4sn: entity work.axi4sn
 	port map(
