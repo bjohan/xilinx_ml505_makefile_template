@@ -11,7 +11,8 @@ def convert_axi4s_packer(hdl):
     inRegs = Signal(intbv()[24:])
     valid = Signal(False)
     ready = Signal(False)
-    axi4s_packer_inst = axi4s_packer(reset, clk, o, inRegs, 8, valid, ready )
+    txOne = Signal(False)
+    axi4s_packer_inst = axi4s_packer(reset, clk, o, inRegs, valid, ready, txOne)
     axi4s_packer_inst.convert(hdl=hdl);
 
 

@@ -55,6 +55,7 @@ def axi4s_unpacker(reset, clk, i, out_regs_o, out_valid_o, readyIn, words, tooLo
                 out_valid.next = 0
                 readyOut.next = 1
                 n.next = 0
+                words.next = 0
                 stat.next = t_State.S_SHIFTING
 
         if stat == t_State.S_SHIFT_REST:
@@ -66,6 +67,7 @@ def axi4s_unpacker(reset, clk, i, out_regs_o, out_valid_o, readyIn, words, tooLo
             out_regs.next[len(i.data)*num:len(i.data)*(num-1)]=0
             if n == num-1:
                 stat.next = t_State.S_TRANSFER_OUT
-            n.next = n+1
+            else:
+                n.next = n+1
 
     return logic, shadow_regs

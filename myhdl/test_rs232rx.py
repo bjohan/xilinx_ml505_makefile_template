@@ -18,8 +18,8 @@ def test_rs232rx():
     def clkgen():
         clk.next = not clk
 
-    rs232tx_inst = rs232tx(reset, toTx, txValid, txReady, txBusy, txd, clk)
-    rs232rx_inst = rs232rx(reset, rxdata, rxValid, txd, clk);
+    rs232tx_inst = rs232tx(reset, toTx, txValid, txReady, txBusy, txd, clk, 5)
+    rs232rx_inst = rs232rx(reset, rxdata, rxValid, txd, clk, 5);
 
     @instance
     def stimulus():

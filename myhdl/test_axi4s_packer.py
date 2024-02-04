@@ -21,13 +21,13 @@ def test_axi4s_packer():
     o.ready.next = 1
     writeWait = Signal(False)
     writeBlocked = Signal(False)
-    
+    txOne = Signal(False) 
     inRegs = Signal(intbv(0)[8*3:])
 
 
     valid = Signal(False)
     ready = Signal(False)
-    axi4s_packer_inst = axi4s_packer(reset, clk, o, inRegs, 8, valid, ready )
+    axi4s_packer_inst = axi4s_packer(reset, clk, o, inRegs, valid, ready, txOne )
 
     @always(delay(10))
     def clkgen():
