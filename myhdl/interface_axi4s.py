@@ -38,9 +38,11 @@ def tbReceive(clk, bus, data, last, delay):
         yield clk.posedge
     if data != bus.data:
         print("Data does not match. Got", hex(bus.data), " expected ", hex(data))
+        yield clk.posedge
         quit(-1)
     if last != bus.last:
         print("Last bit does not match when transfering", data, ". Got", bus.last, "expected", last)
+        yield clk.posedge
         quit(-1)
     bus.ready.next = 0
 

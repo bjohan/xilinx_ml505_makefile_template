@@ -11,8 +11,9 @@ def convert_dpbram_fifo(hdl):
     ready = Signal(False)
     valid = Signal(False)
     re = Signal(False)
+    empty = Signal(False)
     nWords = 1024;
-    dpbram_fifo_inst = dpbram_fifo(reset, clk, din, we, ready, dout, re, valid, nWords)
+    dpbram_fifo_inst = dpbram_fifo(reset, clk, din, we, ready, dout, re, valid, empty, nWords)
     dpbram_fifo_inst.convert(hdl=hdl);
 
 convert_dpbram_fifo(hdl='VHDL')

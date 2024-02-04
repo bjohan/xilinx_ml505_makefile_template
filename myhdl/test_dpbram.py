@@ -14,6 +14,7 @@ def test_dpbram():
     
     we = Signal(False)
     wr_b = Signal(False)
+    empty = Signal(False)
     nWords = 16;
     dpbram_inst = dpbram(clk, we, waddr, din, dout_a, clk, wr_b, raddr, din_b, dout, nWords)
 

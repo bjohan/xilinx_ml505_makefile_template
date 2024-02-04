@@ -13,9 +13,10 @@ def test_dpbram_fifo():
     re = Signal(False)
     ready = Signal(False)
     valid = Signal(False)
+    empty = Signal(False)
     
     nWords = 16;
-    dpbram_fifo_inst = dpbram_fifo(reset, clk, din,we, ready, dout, re, valid, nWords)
+    dpbram_fifo_inst = dpbram_fifo(reset, clk, din,we, ready, dout, re, valid, empty, nWords)
     @always(delay(10))
     def clkgen():
         clk.next = not clk

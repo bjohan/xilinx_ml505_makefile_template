@@ -181,19 +181,33 @@ begin
 	--fifoDin(31 downto 0) <= testData;
 	--fifoDin(35 downto 32) <= "0000";
 
-    i_fifo: entity work.dpbram_fifo
+    --i_fifo: entity work.dpbram_fifo
+    --port map(
+    --    reset => rst,
+    --    clk => clk_usr,
+    --    --din => fifoDin,
+    --    din => testData,
+    --    we => testDataValid,
+    --    ready_o => testDataReady,
+    --    --dout => fifoDout,
+    --    dout => testData2,
+    --    re => testData2Ready,
+    --    valid_o => testData2Valid
+    --);
+    i_fifo: entity work.axi4s_fifo
     port map(
         reset => rst,
         clk => clk_usr,
-        --din => fifoDin,
-        din => testData,
-        we => testDataValid,
-        ready_o => testDataReady,
-        --dout => fifoDout,
-        dout => testData2,
-        re => testData2Ready,
-        valid_o => testData2Valid
+        i_data => testData,
+        i_valid => testDataValid,
+        i_ready => testDataReady,
+        i_last => '0',
+        
+        o_data => testData2,
+        o_valid => testData2Valid,
+        o_ready => testData2Ready
     );
+        
     
 
 	--testData2 <= fifoDout(31 downto 0);
