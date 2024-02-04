@@ -2,12 +2,12 @@ from myhdl import *
 from interface_axi4s import Axi4sInterface
 
 from component_axi4s_unpacker import axi4s_unpacker
-dataToWrite =  [   0xA0, 0xA1, 0xA2, 0xC0, 0xA3, 0xB0, 0xC0, 0x03,  0xB1,          0xB0, 0xB1, 0xB2, 0x03, 0xC0, 0xC0,             0xC0, 0xC1, 0xC2, 0xC0, 0x03, 0xE3,   0xD0, 0xD1, 0xD2, 0xC0]
-writeDelays  = [   0,    3,    0,    0,    1,    0,    0,    0,     1,             0,    0,    4,    0,    0,    0,                0,    0,    0,    0,    0,    2,      0,    0,   0,    0]
-writeLast   =  [   0,    0,    0,    0,    0,    0,    0,    0,     1,             0,    0,    0,    0,    0,    1,                0,    0,    0,    0,    0,    1,      0,    0,   0,    1]
+dataToWrite =  [   0xA0, 0xA1, 0xA2, 0xC0, 0xA3, 0xB0, 0xC0, 0x03,  0xB1,          0xB0, 0xB1, 0xB2, 0x03, 0xC0, 0xC0,             0xC0, 0xC1, 0xC2, 0xC0, 0x03, 0xE3,   0xD0, 0xD1, 0xD2, 0xC0,    0xFF,    0xE0, 0xE1, 0xE2]
+writeDelays  = [   0,    3,    0,    0,    1,    0,    0,    0,     1,             0,    0,    4,    0,    0,    0,                0,    0,    0,    0,    0,    2,      0,    0,    0,    0,       0,       0,    0,    0]
+writeLast   =  [   0,    0,    0,    0,    0,    0,    0,    0,     1,             0,    0,    0,    0,    0,    1,                0,    0,    0,    0,    0,    1,      0,    0,    0,    1,       1,       0,    0,    1]
 
-dataToRead = [0xA2A1A0, 0xB2B1B0, 0xC2C2C0, 0xD2D1D0]
-readDelays = [0, 0, 10, 0]
+dataToRead = [0xA2A1A0, 0xB2B1B0, 0xC2C2C0, 0xD2D1D0, 0x0000FF, 0xE2E1E0]
+readDelays = [0,        0,        10,       0,        3,        0]
 
 @block
 def test_axi4s_unpacker():
@@ -22,10 +22,12 @@ def test_axi4s_unpacker():
     
     outRegs = Signal(intbv(0)[8*3:])
 
+    nWords = Signal(intbv(0, min = 0, max = 8))
 
     valid = Signal(False)
     ready = Signal(False)
-    axi4s_unpacker_inst = axi4s_unpacker(reset, clk, i, outRegs, 8, valid, ready )
+    tooLong = Signal(False)
+    axi4s_unpacker_inst = axi4s_unpacker(reset, clk, i, outRegs, valid, ready, nWords, tooLong)
 
     @always(delay(10))
     def clkgen():
@@ -80,6 +82,7 @@ def test_axi4s_unpacker():
             while not i.transacts():
                 yield clk.posedge
             writeBlocked.next = 0
+        i.valid.next = 0
         for j in range(3):
             yield clk.posedge
 
