@@ -16,7 +16,7 @@ def test_axi4s_fifo():
     i = Axi4sInterface(8); 
     o = Axi4sInterface(8);
  
-    axi4s_fifo_inst = axi4s_fifo(reset, clk, i, o, 16)
+    axi4s_fifo_inst = axi4s_fifo(reset, clk, i, o, 8)
 
     @always(delay(10))
     def clkgen():
