@@ -168,13 +168,13 @@ begin
 	port map(
 		reset => rst,
         	clk => clk_usr,
-        	tDataIn => fromRx,
-        	tValidIn => dataValid,
-		tLastIn => '0',
+        	i_data => fromRx,
+        	i_valid => dataValid,
+		    i_last => '0',
         	--tReadyOut_o => ;
-        	tDataOut => testData,
-        	tValidOut_o => testDataValid,
-        	tReadyIn => testDataReady
+        	o_data => testData,
+        	o_valid => testDataValid,
+        	o_ready => testDataReady
 	);
 
 
@@ -201,16 +201,14 @@ begin
 	i_axi4sn: entity work.axi4sn
 	port map(
 		reset => rst,
-        	clk => clk_usr,
-        	tDataIn => testData2,
-        	tValidIn => testData2Valid,
-        	tReadyOut_o => testData2Ready,
-		tLastIn => '0',
-        	tDataOut => toTxData,
-        	tValidOut_o => toTxValid,
-        	tReadyIn => toTxReady
-
-
+        clk => clk_usr,
+        i_data => testData2,
+        i_valid => testData2Valid,
+        i_ready => testData2Ready,
+	    i_last => '0',
+        o_data => toTxData,
+        o_valid => toTxValid,
+        o_ready => toTxReady
 	);
 
 p_trig : process(clk_usr)

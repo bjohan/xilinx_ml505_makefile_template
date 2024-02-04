@@ -1,22 +1,15 @@
 from myhdl import *
 
+from interface_axi4s import Axi4sInterface
 from component_axi4sw import axi4sw
 
 def convert_axi4sw(hdl):
     clk = Signal(False)
     reset = ResetSignal(False, active=1, isasync=False)
-    
-    tDataIn = Signal(intbv(0xAA)[8:])
-    tValidIn = Signal(False)
-    tReadyOut = Signal(False)
-    tLastIn = Signal(False)
-    
-    tDataOut = Signal(intbv(0)[32:])
-    tValidOut = Signal(False)
-    tReadyIn = Signal(False)
-    tLastOut = Signal(False)
+    i = Axi4sInterface(8)
+    o = Axi4sInterface(32)    
 
-    axi4sw_inst = axi4sw(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut, 4)
+    axi4sw_inst = axi4sw(reset, clk, i, o, 4)
     axi4sw_inst.convert(hdl=hdl);
 
 
