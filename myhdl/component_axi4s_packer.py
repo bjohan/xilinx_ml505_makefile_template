@@ -40,7 +40,7 @@ def axi4s_packer(reset, clk, o, in_regs, in_valid ,in_ready_o, txOne):
                 if n+1 == nToTx-1:
                     o.last.next = 1
 
-                for j in range(nToTx-1):
+                for j in range(num-1):
                     topBit = (j+2)*len(o.data)
                     midBit = (j+1)*len(o.data)
                     lowBit = (j)*len(o.data)
