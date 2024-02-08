@@ -11,6 +11,7 @@ $(PYTHON):
 	mkdir -p pyenv
 	python3 -m venv pyenv
 	pyenv/bin/pip install git+https://github.com/myhdl/myhdl.git@master
+	pyenv/bin/pip install getchar
 
 test_%.vcd: test_%.py component_%.py $(PYTHON)
 	$(PYTHON) $<

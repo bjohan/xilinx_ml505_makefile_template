@@ -1,7 +1,8 @@
 from myhdl import *
 from interface_axi4s import Axi4sInterface, tbTransmitSequence, tbReceiveSequence
 from component_test_application_str import test_application_str
-
+from component_stdin_rx import stdin_rx
+from component_stdout_tx import stdout_tx
 dataToWrite = [   0xFF,                                            0x01, 0xAB, 0xAC]
 writeDelays = [   0,                                               4,    0,    0,  ]
 writeLast   = [   1,                                               0,    0,    1,  ]
@@ -17,8 +18,9 @@ def test_test_application_str():
     
     streamIn = Axi4sInterface(8)
     streamOut = Axi4sInterface(8) 
-
+    i_stdin = stdin_rx(reset, clk, streamIn)
     test_application_str_inst = test_application_str(reset, clk, streamIn, streamOut )
+    i_stdout = stdout_tx(reset, clk, streamOut)
 
     @always(delay(10))
     def clkgen():
@@ -29,7 +31,7 @@ def test_test_application_str():
 
     @instance
     def monitor():
-        for i in range(100):
+        for i in range(1000000):
             yield clk.posedge
         print("Simulation did not end successfully")
         quit(-1)
@@ -42,19 +44,21 @@ def test_test_application_str():
         reset.next = 0
         yield clk.posedge
 
-    @instance
-    def read():
-        yield reset.negedge
-        yield tbReceiveSequence(clk, streamOut, dataToRead, readLast, readDelays);
-        raise StopSimulation("Simulation ended successfully")
+    #@instance
+    #def read():
+    #    streamOut.ready.next = 1
+    #    yield clk.posedge
+    #    yield reset.negedge
+    #    yield tbReceiveSequence(clk, streamOut, dataToRead, readLast, readDelays);
+    #    raise StopSimulation("Simulation ended successfully")
 
-    @instance
-    def write():
-        yield reset.negedge
-        yield tbTransmitSequence(clk, streamIn, dataToWrite, writeLast, writeDelays);
+    #@instance
+    #def write():
+    #    yield reset.negedge
+    #    yield tbTransmitSequence(clk, streamIn, dataToWrite, writeLast, writeDelays);
 
 
-    return clkgen, gen_reset, monitor, test_application_str_inst, write, read
+    return clkgen, gen_reset, monitor, test_application_str_inst, i_stdin, i_stdout#, read
 
 tb = test_test_application_str();
 tb.config_sim(trace=True)

@@ -13,7 +13,7 @@ PACKAGE=ff1136
 VHDLS = $(wildcard *.vhdl) $(wildcard *.vhd)
 VERILOGS = $(wildcard *.v)
 
-MYHDL_NAMES = $(basename $(patsubst myhdl/component_%, myhdl/%, $(wildcard myhdl/component_*.py)))
+MYHDL_NAMES = $(basename $(patsubst myhdl/generate_vhdl_%, myhdl/%, $(wildcard myhdl/generate_vhdl_*.py)))
 MYHDL_GEN = $(addsuffix .vhd, $(MYHDL_NAMES)) myhdl/pck_myhdl_011.vhd
 COREGEN_NAMES = $(basename  $(wildcard coregen_files/*.cgp))
 COREGEN_GEN = $(addsuffix .vhd, $(COREGEN_NAMES))
@@ -152,7 +152,7 @@ export COREGEN_OPTS
 PAF = $(TARGET)_plan_ahead_project_init.tcl
 CGF = $(TARGET)_coregen.cgp
 
-myhdl/%.vhd: myhdl/component_%.py myhdl/generate_vhdl_%.py
+myhdl/%.vhd: myhdl/generate_vhdl_%.py
 	$(MAKE) -C myhdl $(@F)
 
 coregen_files/%.vhd: coregen_files/%.cgp coregen_files/%.xco
