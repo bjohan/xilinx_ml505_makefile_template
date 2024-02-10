@@ -48,7 +48,7 @@ interactive: $(INTERACTIVES)
 all: tests vhdls simulations interactives
 
 clean:
-	rm -f $(VCDS) $(VHDLS) $(SIMULATION_VCDS) pck_myhdl_011.vhd
+	rm -f $(VCDS) $(VHDLS) $(SIMULATION_VCDS) $(INTERACTIVE_VCDS) pck_myhdl_011.vhd
 
 clean_pyenv:
 	rm -rf pyenv
