@@ -2,8 +2,13 @@ COMPONENTS = $(wildcard test_*.py)
 VCDS = $(COMPONENTS:.py=.vcd)
 NAMES_WITH_SUFFIX = $(patsubst test_%,% ,$(COMPONENTS))
 VHDLS = $(patsubst %.py, %.vhd, $(NAMES_WITH_SUFFIX))
+
 SIMULATION_SOURCES = $(wildcard simulation_*.py)
-SIMULATIONS = $(SIMULATION_SOURCES:.py=.vcd)
+SIMULATION_VCDS = $(SIMULATION_SOURCES:.py=.vcd)
+
+INTERACTIVE_SOURCES = $(wildcard interactive_*.py)
+INTERACTIVE_VCDS = $(INTERACTIVE_SOURCES:.py=.vcd)
+
 PYTHON = ./pyenv/bin/python3
 
 
@@ -24,17 +29,26 @@ simulation_%.vcd: simulation_%.py $(PYTHON)
 	$(PYTHON) $<
 	rm -f $(@:.vcd=.*.*.vcd)
 
+interactive_%.vcd: interactive_%.py client_%.py $(PYTHON)
+	$(PYTHON) $<&
+	sleep 0.5
+	$(PYTHON) $(word 2, $^)
+	rm -f $(@:.vcd=.*.*.vcd)
+    
+
 .PHONY: clean simuations vhdls tests all
 tests: $(VCDS)
 
 vhdls: $(VHDLS)
 
-simulations: $(SIMULATIONS)
+simulations: $(SIMULATION_VCDS)
 
-all: tests vhdls simulations
+interactive: $(INTERACTIVES)
+
+all: tests vhdls simulations interactives
 
 clean:
-	rm -f $(VCDS) $(VHDLS) $(SIMULATIONS) pck_myhdl_011.vhd
+	rm -f $(VCDS) $(VHDLS) $(SIMULATION_VCDS) pck_myhdl_011.vhd
 
 clean_pyenv:
 	rm -rf pyenv

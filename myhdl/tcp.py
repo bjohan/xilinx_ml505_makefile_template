@@ -1,4 +1,6 @@
 import socket
+import select 
+import errno
 
 class TcpServerClient:
     def __init__(self, conn, addr):
@@ -10,6 +12,16 @@ class TcpServerClient:
 
     def send(self, d):
         return self.conn.send(d)
+
+    def connectionValid(self):
+        try:
+            b = self.conn.recv(1, socket.MSG_PEEK | socket.MSG_DONTWAIT)
+            if b == b'':
+                return False
+        except BlockingIOError as e:
+            if e.errno != errno.EAGAIN:
+                raise
+        return True
 
 class TcpServer:
     def __init__(self, host, port):

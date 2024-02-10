@@ -10,8 +10,8 @@ t_FifoState = enum('S_IDLE', 'S_FILLING', 'S_FULL');
 
 @block
 def function_debug_core(reset, clk, i, o, debug, depth):
-   
-    bc = Signal(modbv(-1)[32:])
+    wb = len(i.data) 
+    bc = Signal(modbv(-1)[wb:])
     myFunctionId = Signal(intbv(functionId['debug_core'])[len(i.data):]) 
     state = Signal(t_State.S_IDLE)
     maxWords = 4+int(len(debug)/len(i.data))
@@ -70,20 +70,20 @@ def function_debug_core(reset, clk, i, o, debug, depth):
             outReady.next = 0
             inValid.next = 0
             if outValid:
-                if nWords == 1 and outWords[32:0] == bc:
+                if nWords == 1 and outWords[wb:0] == bc:
                     #Send obligatory broadcast response that is a package only containning function id
                     state.next = t_State.S_BC_RESP1
-                    inWords.next[32:0] = myFunctionId
+                    inWords.next[wb:0] = myFunctionId
                     inValid.next = 1
                     txOne.next = 1
                     outReady.next = 1
-                elif outWords[32:0] == 0x00000001 and nWords == maxWords:
+                elif outWords[wb:0] == 0x00000001 and nWords == maxWords:
                     andMask.next = outWords[len(i.data)*4+len(debug):len(i.data)*4]
                     outReady.next = 1
-                elif outWords[32:0] == 0x00000002 and nWords == maxWords:
+                elif outWords[wb:0] == 0x00000002 and nWords == maxWords:
                     orMask.next = outWords[len(i.data)*4+len(debug):len(i.data)*4]
                     outReady.next = 1
-                elif outWords[32:0] == 0x00000003 and nWords == maxWords:
+                elif outWords[wb:0] == 0x00000003 and nWords == maxWords:
                     armAnd.next = outWords[len(i.data)]
                     armOr.next = outWords[len(i.data)+1]
                     outReady.next = 1
@@ -100,9 +100,9 @@ def function_debug_core(reset, clk, i, o, debug, depth):
             if inReady:
                 #Send extra respons containing lengths
                 txOne.next = 0
-                inWords.next[32:0] = myFunctionId
-                inWords.next[64:32] = len(debug)
-                inWords.next[96:64] = depth
+                inWords.next[wb:0] = myFunctionId
+                inWords.next[2*wb:wb] = len(debug)
+                inWords.next[3*wb:2*wb] = depth
                 inValid.next = 1
                 state.next = t_State.S_BC_RESP2
 
@@ -120,9 +120,9 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                 state.next = t_State.S_IDLE
                 fifoDataRead.next = 0
             elif inReady and not fifoDataRead:
-                inWords.next[32:0] = myFunctionId
-                inWords.next[64:32] = len(debug)
-                inWords.next[96:64] = depth
+                inWords.next[wb:0] = myFunctionId
+                inWords.next[2*wb:wb] = len(debug)
+                inWords.next[3*wb:2*wb] = depth
                 inWords.next[len(i.data)*4+len(debug):len(i.data)*4]=fifoDataOut
                 inValid.next = 1
                 fifoDataRead.next = 1
