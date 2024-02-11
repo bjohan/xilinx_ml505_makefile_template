@@ -43,7 +43,7 @@ vhdls: $(VHDLS)
 
 simulations: $(SIMULATION_VCDS)
 
-interactive: $(INTERACTIVES)
+interactives: $(INTERACTIVES)
 
 all: tests vhdls simulations interactives
 

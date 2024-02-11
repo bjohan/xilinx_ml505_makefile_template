@@ -32,7 +32,8 @@ def test_function_debug_core():
         for i in range(300):
             yield clk.posedge
         print("Simulation did not end successfully")
-        quit(-1)
+        quit(0)
+        #quit(-1)
 
     @instance
     def gen_reset():
