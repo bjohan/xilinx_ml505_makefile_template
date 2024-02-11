@@ -10,19 +10,27 @@ t_FifoState = enum('S_IDLE', 'S_FILLING', 'S_FULL');
 
 @block
 def function_debug_core(reset, clk, i, o, debug, depth):
-    wb = len(i.data) 
-    bc = Signal(modbv(-1)[wb:])
+    bw = len(i.data) #bus width 
     myFunctionId = Signal(intbv(functionId['debug_core'])[len(i.data):]) 
+    hww = 32 #Header word witdth
+    nHeaderWords = 4
+    nHeaderBits = nHeaderWords*hww
+    headerStart = 0
+    headerEnd = nHeaderBits
+    debugStart = headerEnd
+    debugEnd = debugStart+len(debug)
+
+
     state = Signal(t_State.S_IDLE)
     maxWords = 4+int(len(debug)/len(i.data))
     andMask = Signal(modbv(-1)[len(debug):])
     orMask = Signal(modbv(-1)[len(debug):])
     print("Lengths", len(debug), len(andMask), len(orMask))
-    inWords = Signal(intbv(0)[len(i.data)*4+len(debug):])
+    inWords = Signal(intbv(0)[nHeaderBits+len(debug):])
     inValid = Signal(False)
     inReady = Signal(False)
 
-    outWords = Signal(modbv(0)[len(i.data)*4+len(debug):])
+    outWords = Signal(modbv(0)[nHeaderBits+len(debug):])
     outValid = Signal(False)
     outReady = Signal(False)
     
@@ -70,22 +78,22 @@ def function_debug_core(reset, clk, i, o, debug, depth):
             outReady.next = 0
             inValid.next = 0
             if outValid:
-                if nWords == 1 and outWords[wb:0] == bc:
+                if nWords == 1 and outWords[bw:0] == modbv(-1)[bw:]:
                     #Send obligatory broadcast response that is a package only containning function id
                     state.next = t_State.S_BC_RESP1
-                    inWords.next[wb:0] = myFunctionId
+                    inWords.next[bw:0] = myFunctionId
                     inValid.next = 1
                     txOne.next = 1
                     outReady.next = 1
-                elif outWords[wb:0] == 0x00000001 and nWords == maxWords:
-                    andMask.next = outWords[len(i.data)*4+len(debug):len(i.data)*4]
+                elif outWords[hww:0] == 0x00000001 and nWords == maxWords:
+                    andMask.next = outWords[debugEnd:debugStart]
                     outReady.next = 1
-                elif outWords[wb:0] == 0x00000002 and nWords == maxWords:
-                    orMask.next = outWords[len(i.data)*4+len(debug):len(i.data)*4]
+                elif outWords[hww:0] == 0x00000002 and nWords == maxWords:
+                    orMask.next = outWords[debugEnd:debugStart]
                     outReady.next = 1
-                elif outWords[wb:0] == 0x00000003 and nWords == maxWords:
-                    armAnd.next = outWords[len(i.data)]
-                    armOr.next = outWords[len(i.data)+1]
+                elif outWords[hww:0] == 0x00000003 and nWords == maxWords:
+                    armAnd.next = outWords[hww]
+                    armOr.next = outWords[hww+1]
                     outReady.next = 1
                 else:
                     outReady.next = 1
@@ -98,11 +106,11 @@ def function_debug_core(reset, clk, i, o, debug, depth):
         if state == t_State.S_BC_RESP1:
             outReady.next = 0
             if inReady:
-                #Send extra respons containing lengths
+                #Send extra response containing lengths
                 txOne.next = 0
-                inWords.next[wb:0] = myFunctionId
-                inWords.next[2*wb:wb] = len(debug)
-                inWords.next[3*wb:2*wb] = depth
+                inWords.next[hww:0] = myFunctionId
+                inWords.next[2*hww:hww] = len(debug)
+                inWords.next[3*hww:2*hww] = depth
                 inValid.next = 1
                 state.next = t_State.S_BC_RESP2
 
@@ -120,10 +128,10 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                 state.next = t_State.S_IDLE
                 fifoDataRead.next = 0
             elif inReady and not fifoDataRead:
-                inWords.next[wb:0] = myFunctionId
-                inWords.next[2*wb:wb] = len(debug)
-                inWords.next[3*wb:2*wb] = depth
-                inWords.next[len(i.data)*4+len(debug):len(i.data)*4]=fifoDataOut
+                inWords.next[bw:0] = myFunctionId
+                inWords.next[hww:0] = len(debug)
+                inWords.next[2*hww:hww] = depth
+                inWords.next[debugEnd:debugStart]=fifoDataOut
                 inValid.next = 1
                 fifoDataRead.next = 1
             else:
