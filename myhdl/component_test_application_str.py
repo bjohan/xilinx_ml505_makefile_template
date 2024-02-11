@@ -23,4 +23,8 @@ def test_application_str(reset, clk, i, o):
     axi4s_address_branch_inst = axi4s_address_branch(reset, clk, i, o, i_func, o_func, funcaddr, through, through)
     debug_core_inst = function_debug_core(reset, clk, i_func, o_func, debug, 1024)
     
-    return axi4s_address_branch_inst, debug_core_inst
+    @always_seq(clk.posedge, reset=reset)
+    def logic():
+        debug.next=debug+1
+
+    return axi4s_address_branch_inst, debug_core_inst, logic

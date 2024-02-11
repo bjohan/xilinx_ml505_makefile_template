@@ -129,7 +129,7 @@ class FpgaInterface:
                 print("Loopback frame", frame)
             else:
                 if addr not in self.functionMap:
-                    self.functionMap[addr] = functions.functions.functionMap[int.from_bytes(payload)](addr)
+                    self.functionMap[addr] = functions.functions.functionMap[int.from_bytes(payload)](addr, self)
                 else:
                     self.functionMap[addr].setup(payload)
 
@@ -138,3 +138,12 @@ cli = TcpClient("localhost", 8080)
 cli.sck.settimeout(0.1)
 iface = FpgaInterface(cli)
 iface.initialize()
+dbg = iface.functionMap[b'\x01']
+dbg.setAndMask('1'*73)
+dbg.setOrMask('1'*73)
+dbg.setArm()
+dbg.receiveData()
+
+dbg.setArm()
+dbg.receiveData()
+time.sleep(0.1)

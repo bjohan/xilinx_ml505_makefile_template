@@ -33,7 +33,7 @@ def interactive_test_application(conn):
 
     @instance
     def monitor():
-        for i in range(10000):
+        for i in range(100000):
             yield clk.posedge
         print("Simulation did not end successfully")
         quit(-1)

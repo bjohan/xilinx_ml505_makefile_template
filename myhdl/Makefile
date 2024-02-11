@@ -17,6 +17,7 @@ $(PYTHON):
 	python3 -m venv pyenv
 	pyenv/bin/pip install git+https://github.com/myhdl/myhdl.git@master
 	pyenv/bin/pip install getchar
+	pyenv/bin/pip install bitstring
 
 test_%.vcd: test_%.py component_%.py $(PYTHON)
 	$(PYTHON) $<

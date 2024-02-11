@@ -22,12 +22,13 @@ def function_debug_core(reset, clk, i, o, debug, depth):
 
 
     state = Signal(t_State.S_IDLE)
-    maxWords = 4+int(len(debug)/len(i.data))
+    maxWords = nHeaderWords*int(hww/len(i.data))+int(len(debug)/len(i.data))
     andMask = Signal(modbv(-1)[len(debug):])
     orMask = Signal(modbv(-1)[len(debug):])
     inWords = Signal(intbv(0)[nHeaderBits+len(debug):])
     inValid = Signal(False)
     inReady = Signal(False)
+    currentWord = Signal(modbv(0)[hww:])
 
     outWords = Signal(modbv(0)[nHeaderBits+len(debug):])
     outValid = Signal(False)
@@ -99,8 +100,10 @@ def function_debug_core(reset, clk, i, o, debug, depth):
             if fifoState == t_FifoState.S_FULL:
                 #fifoDataRead.next = 1
                 state.next = t_State.S_TRANSMIT_FIFO
+                currentWord.next = 0
                 armAnd.next = 0
                 armOr.next = 0
+                fifoState.next = t_FifoState.S_IDLE
 
         if state == t_State.S_BC_RESP1:
             outReady.next = 0
@@ -127,12 +130,13 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                 state.next = t_State.S_IDLE
                 fifoDataRead.next = 0
             elif inReady and not fifoDataRead:
-                inWords.next[bw:0] = myFunctionId
                 inWords.next[hww:0] = len(debug)
-                inWords.next[2*hww:hww] = depth
+                inWords.next[2*hww:hww] = depth-1
+                inWords.next[3*hww:2*hww] = currentWord
                 inWords.next[debugEnd:debugStart]=fifoDataOut
                 inValid.next = 1
                 fifoDataRead.next = 1
+                currentWord.next = currentWord+1
             else:
                 inValid.next = 0 
                 fifoDataRead.next = 0
