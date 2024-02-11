@@ -1,7 +1,9 @@
 from tcp import TcpClient
 import socket
 import time
-import function_ids
+import functions.functions
+import struct
+
 class DeEscaper:
     def __init__(self, esc, end):
         self.esc = esc;
@@ -57,12 +59,21 @@ class Escaper:
         output+=self.escaped(data[-1])
         return bytes(output)
 
+class DebugCore:
+    def __init__(self):
+        pass
+    
+    def setup(self, frame):
+        pass
+        
+
 class FpgaInterface:
     def __init__(self, cli):
+        self.bc = 0xff
         self.deescaper = DeEscaper(0xc0, 0x03)
         self.escaper = Escaper(0xc0, 0x03)
         self.cli = cli
-        self.addressMap = {}
+        self.functionMap = {}
 
     def getFrame(self):
         while True:
@@ -77,7 +88,7 @@ class FpgaInterface:
         self.cli.send(self.escaper.generateFrame(data))
 
     def getDiscoveryFrames(self):
-        self.sendFrame([0xff])
+        self.sendFrame([self.bc])
         frames = {}
         rxFrames = 0
         while True:
@@ -88,7 +99,7 @@ class FpgaInterface:
             else:
                 frames[frame]=1
             if rxFrames == 2:
-                self.sendFrame([0xFF])
+                self.sendFrame([self.bc])
             if rxFrames > 4:
                 complete=True
                 for frame in frames:
@@ -98,29 +109,29 @@ class FpgaInterface:
                     break;
         return frames
 
-    def lookupFunction(self, fid):
-        for funcName in function_ids.functionId:
-            if function_ids.functionId[funcName] == fid:
-                return funcName
-
-    def lookupAddress(self, frame):
-            for addr in self.addressMap:
-                if addr == frame[0:len(addr)]:
-                    return self.addressMap[addr]
+    def getAddressAndPayload(self, frame):
+        addr = []
+        nAddrBytes = 0
+        for b in frame:
+            if b==self.bc:
+                break
+            addr.append(b)
+            nAddrBytes+=1
+        payload = frame[nAddrBytes+1:]
+        return bytes(addr), bytes(payload)
 
     def initialize(self):
         frames = self.getDiscoveryFrames()
         for frame in frames:
-            if frame[-1] == 0xFF:
+            addr, payload = self.getAddressAndPayload(frame)
+
+            if len(addr) == 0:
                 print("Loopback frame", frame)
-            
-            if self.lookupAddress(frame) is None:
-                funcName = self.lookupFunction(frame[-1])
-                if funcName is not None:
-                    self.addressMap[frame[0:-1]]=funcName
-                    print("Frame", frame, "is ident for:", funcName)
             else:
-                print("Frame", frame, "is extra information for:", self.lookupAddress(frame))
+                if addr not in self.functionMap:
+                    self.functionMap[addr] = functions.functions.functionMap[int.from_bytes(payload)](addr)
+                else:
+                    self.functionMap[addr].setup(payload)
 
 print("Creating client")
 cli = TcpClient("localhost", 8080)

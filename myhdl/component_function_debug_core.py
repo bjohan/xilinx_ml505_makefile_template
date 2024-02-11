@@ -4,7 +4,7 @@ from component_axi4s_unpacker import axi4s_unpacker
 from component_axi4s_packer import axi4s_packer
 from component_configurable_trigger import configurable_trigger
 from component_dpbram_fifo import dpbram_fifo
-from function_ids import functionId
+from functions.function_ids import functionId
 t_State = enum('S_IDLE', 'S_BC_RESP1', 'S_BC_RESP2', 'S_WAIT_READY', 'S_TRANSMIT_FIFO', 'S_SET_OR_MASK' );
 t_FifoState = enum('S_IDLE', 'S_FILLING', 'S_FULL');
 
@@ -13,7 +13,7 @@ def function_debug_core(reset, clk, i, o, debug, depth):
     bw = len(i.data) #bus width 
     myFunctionId = Signal(intbv(functionId['debug_core'])[len(i.data):]) 
     hww = 32 #Header word witdth
-    nHeaderWords = 4
+    nHeaderWords = 3
     nHeaderBits = nHeaderWords*hww
     headerStart = 0
     headerEnd = nHeaderBits
@@ -25,7 +25,6 @@ def function_debug_core(reset, clk, i, o, debug, depth):
     maxWords = 4+int(len(debug)/len(i.data))
     andMask = Signal(modbv(-1)[len(debug):])
     orMask = Signal(modbv(-1)[len(debug):])
-    print("Lengths", len(debug), len(andMask), len(orMask))
     inWords = Signal(intbv(0)[nHeaderBits+len(debug):])
     inValid = Signal(False)
     inReady = Signal(False)
