@@ -5,6 +5,7 @@ from component_axi4s_packer import axi4s_packer
 from component_configurable_trigger import configurable_trigger
 from component_dpbram_fifo import dpbram_fifo
 from functions.function_ids import functionId
+import math
 t_State = enum('S_IDLE', 'S_BC_RESP1', 'S_BC_RESP2', 'S_WAIT_READY', 'S_TRANSMIT_FIFO', 'S_SET_OR_MASK' );
 t_FifoState = enum('S_IDLE', 'S_FILLING', 'S_FULL');
 
@@ -22,15 +23,16 @@ def function_debug_core(reset, clk, i, o, debug, depth):
 
 
     state = Signal(t_State.S_IDLE)
-    maxWords = nHeaderWords*int(hww/len(i.data))+int(len(debug)/len(i.data))
+    maxWords = nHeaderWords*int(hww/len(i.data))+math.ceil(len(debug)/len(i.data))
+    print(nHeaderBits, len(debug), bw, maxWords)
     andMask = Signal(modbv(-1)[len(debug):])
     orMask = Signal(modbv(-1)[len(debug):])
-    inWords = Signal(intbv(0)[nHeaderBits+len(debug):])
+    inWords = Signal(intbv(0)[maxWords*bw:])
     inValid = Signal(False)
     inReady = Signal(False)
     currentWord = Signal(modbv(0)[hww:])
 
-    outWords = Signal(modbv(0)[nHeaderBits+len(debug):])
+    outWords = Signal(modbv(0)[maxWords*bw:])
     outValid = Signal(False)
     outReady = Signal(False)
     

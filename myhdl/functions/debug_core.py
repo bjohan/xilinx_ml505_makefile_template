@@ -1,7 +1,7 @@
 import struct
 from functions.function_ids import functionId
 import bitstring
-
+import math
 class DebugCore:
     def __init__(self, addr, iface):
         self.addr = addr
@@ -16,7 +16,7 @@ class DebugCore:
         
     def dataStringToWordsPayload(self,data):
         wordSize = 1;
-        maskBytes = int(self.width/(wordSize*8)+1)
+        maskBytes = math.ceil(self.width/(wordSize*8))
         payload = []
         for b in range(maskBytes):
             s = b*wordSize*8
@@ -31,6 +31,7 @@ class DebugCore:
     def setAndMask(self, mask):
         header = struct.pack("III", 0x00000001, 0, 0)
         data = self.dataStringToWordsPayload(mask)
+        print(len(header+data),len(header), len(data), len(mask))
         frame = self.addr+header+data;
         self.iface.sendFrame(frame)
         
@@ -53,6 +54,7 @@ class DebugCore:
 
     def receiveData(self):
         count = 0
+        data = []
         while True:
             frame = self.iface.getFrame()
             addr, payload = self.iface.getAddressAndPayload(frame)
@@ -60,6 +62,7 @@ class DebugCore:
             tword = list(payload[12:])
             tword.reverse()
             tword = bytes(tword)
-            print(fid, length, current, bitstring.BitArray(tword))
+            data.append(bitstring.BitArray(tword))
             if length -1 == current:
                 break
+        return data
