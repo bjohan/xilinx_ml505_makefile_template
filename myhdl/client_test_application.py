@@ -142,15 +142,18 @@ dbg = iface.functionMap[b'\x01']
 dbg.setAndMask('1'*73)
 dbg.setOrMask('1'*73)
 dbg.setArm()
-dbg.receiveData()
+dbg.dumpVcd('test1.vcd')
 
 dbg2 = iface.functionMap[b'\x03']
 dbg2.setAndMask('1'*13)
 dbg2.setOrMask('1'*13)
 dbg2.setArm()
-print(dbg2.receiveData())
+dbg2.dumpVcd('test2.vcd')
+#dbdat = dbg2.receiveData()
+#print(dbDat)
+
 
 
 dbg.setArm()
-dbg.receiveData()
+dbg.dumpVcd('test3.vcd')
 time.sleep(0.1)

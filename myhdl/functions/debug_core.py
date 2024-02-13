@@ -2,6 +2,70 @@ import struct
 from functions.function_ids import functionId
 import bitstring
 import math
+
+
+class VcdGenerator:
+    def __init__(self, timeScale):
+        self.timeScale = timeScale
+        self.chars = "abcdefghijklm"
+        self.lastBits = None
+
+    def getNextChar(self, c):
+        p = self.chars.find(c)
+        p += 1
+        if p >= len(self.chars):
+            p = 0
+        return self.chars[p]
+
+    def getNextShortname(self, sn):
+        if sn is None:
+            return self.chars[0]
+        for i in range(len(sn)):
+            ls = list(sn)
+            ls[i]=self.getNextChar(sn[i])
+            sn = ''.join(ls)
+            if sn[i]!=self.chars[0]:
+                break
+        else:
+            sn+=self.chars[0]
+        return sn
+            
+
+    def getVariableNames(self, bitarr):
+        variables = []
+        sn = None
+        for b in range(len(bitarr[0])):
+            sn = self.getNextShortname(sn)
+            variables.append(('bit%d'%(b), sn))
+        return variables
+
+    def genBits(self, bits, variableNames):
+        o = ""
+        for b in range(len(bits)):
+            if self.lastBits is None:
+                o+="%d"%(bits[b])+ variableNames[b][1]+"\n"
+            else:
+                if self.lastBits[b] != bits[b]:
+                    o+="%d"%(bits[b])+ variableNames[b][1]+"\n"
+        self.lastBits = bits
+        return o  
+
+    def getVcdString(self, bitarr):
+        variableNames = self.getVariableNames(bitarr)
+        out="$version the best vcd in the universe $end\n"
+        out+="$timescale "+self.timeScale+" $end\n"
+        out+="$scope module debug_core $end\n"
+        for v in variableNames:
+            out+="$var reg 1 "+v[1]+" "+v[0]+" $end\n"
+        out+="$upscope $end\n"
+        out+="$enddefinitions $end\n"
+        out+="$dumpvars\n"
+        for i in range(len(bitarr)):
+            if i > 0:
+                out+="#%d\n"%(i)
+            out+=self.genBits(bitarr[i], variableNames)
+        return out
+
 class DebugCore:
     def __init__(self, addr, iface):
         self.addr = addr
@@ -66,3 +130,10 @@ class DebugCore:
             if length -1 == current:
                 break
         return data
+
+    def dumpVcd(self, fileName):
+        dbdat = self.receiveData();
+        vg = VcdGenerator("1ps")
+        f = open(fileName, 'w')
+        f.write(vg.getVcdString(dbdat))
+        f.close()
