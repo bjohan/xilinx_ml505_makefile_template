@@ -2,12 +2,12 @@ import struct
 from functions.function_ids import functionId
 import bitstring
 import math
-
+import string
 
 class VcdGenerator:
     def __init__(self, timeScale):
         self.timeScale = timeScale
-        self.chars = "abcdefghijklm"
+        self.chars = string.printable
         self.lastBits = None
 
     def getNextChar(self, c):
@@ -126,7 +126,7 @@ class DebugCore:
             tword = list(payload[12:])
             tword.reverse()
             tword = bytes(tword)
-            data.append(bitstring.BitArray(tword))
+            data.append(bitstring.BitArray(reversed(list(bitstring.BitArray(tword)))))
             if length -1 == current:
                 break
         return data
