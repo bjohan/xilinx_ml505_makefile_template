@@ -24,7 +24,6 @@ def function_debug_core(reset, clk, i, o, debug, depth):
 
     state = Signal(t_State.S_IDLE)
     maxWords = nHeaderWords*int(hww/len(i.data))+math.ceil(len(debug)/len(i.data))
-    print(nHeaderBits, len(debug), bw, maxWords)
     andMask = Signal(modbv(-1)[len(debug):])
     orMask = Signal(modbv(-1)[len(debug):])
     inWords = Signal(intbv(0)[maxWords*bw:])

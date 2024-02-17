@@ -5,6 +5,7 @@ import errno
 class TcpServerClient:
     def __init__(self, conn, addr):
         self.conn = conn
+        self.conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.addr = addr
 
     def recv(self, n=1024):
@@ -36,13 +37,21 @@ class TcpServer:
 class TcpClient:
     def __init__(self, host, port):
         self.sck = socket.socket()
+        self.sck.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.sck.connect((host, port))
-    
+        self.sck.settimeout(0.1)
+
+    def read(self, n=1024):
+        return self.recv(n) 
+   
     def recv(self, n=1024):
         return self.sck.recv(n)
 
     def send(self, d):
         return self.sck.send(d)
+
+    def write(self, d):
+            return self.send(bytes(d))
 
 if __name__ == "__main__":
     import sys

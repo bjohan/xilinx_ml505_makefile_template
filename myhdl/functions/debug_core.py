@@ -3,6 +3,7 @@ from functions.function_ids import functionId
 import bitstring
 import math
 import string
+import queue
 
 class VcdGenerator:
     def __init__(self, timeScale):
@@ -67,17 +68,21 @@ class VcdGenerator:
         return out
 
 class DebugCore:
-    def __init__(self, addr, iface):
+    def __init__(self, addr, writer):
+        self.q = queue.Queue()
         self.addr = addr
-        self.iface = iface
-        print("Created Debug Core with address:", self.addr)
+        self.writer = writer
+        #print("Created Debug Core with address:", self.addr)
     
     def setup(self, frame):
         (fid, self.width, self.depth)=struct.unpack("III", frame[0:12])
         if fid != functionId['debug_core']:
             raise ValueError("Invalid function id for debug core")
-        print("Setup debugcore with bus width:", self.width, "fifo depth:", self.depth)
-        
+        #print("Setup debugcore with bus width:", self.width, "fifo depth:", self.depth)
+
+    def put(self, frame):
+        self.q.put(frame)
+
     def dataStringToWordsPayload(self,data):
         wordSize = 1;
         maskBytes = math.ceil(self.width/(wordSize*8))
@@ -95,15 +100,15 @@ class DebugCore:
     def setAndMask(self, mask):
         header = struct.pack("III", 0x00000001, 0, 0)
         data = self.dataStringToWordsPayload(mask)
-        print(len(header+data),len(header), len(data), len(mask))
+        #print(len(header+data),len(header), len(data), len(mask))
         frame = self.addr+header+data;
-        self.iface.sendFrame(frame)
+        self.writer.writeFrame(frame)
         
     def setOrMask(self, mask):
         header = struct.pack("III", 0x00000002, 0, 0)
         data = self.dataStringToWordsPayload(mask)
         frame = self.addr+header+data;
-        self.iface.sendFrame(frame)
+        self.writer.writeFrame(frame)
         
     def setArm(self, trigOnAnd=True, trigOnOr=True):
         av = 0;
@@ -114,14 +119,13 @@ class DebugCore:
         header = struct.pack("III", 0x00000003, av, 0)
         data = self.dataStringToWordsPayload(self.width*'0')
         frame = self.addr+header+data;
-        self.iface.sendFrame(frame)
+        self.writer.writeFrame(frame)
 
     def receiveData(self):
         count = 0
         data = []
         while True:
-            frame = self.iface.getFrame()
-            addr, payload = self.iface.getAddressAndPayload(frame)
+            payload = self.q.get()
             (fid, length, current) = struct.unpack("III", payload[0:12])
             tword = list(payload[12:])
             tword.reverse()
