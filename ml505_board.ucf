@@ -22,3 +22,12 @@ NET "serial1_rx" LOC = "AG15";
 NET "hdr_2" LOC = "H33";
 NET "hdr_4" LOC = "F34";
 NET "hdr_6" LOC = "H34";
+
+NET "phy_rxclk" LOC = "H17";
+NET "phy_txclk" LOC = "K17";
+NET "phy_txc_gtxclk" LOC = "J16";
+
+NET "phy_reset" LOC = "J14";
+NET "phy_mdio" LOC = "H13";
+NET "phy_mdc" LOC = "H19";
+NET "phy_int" LOC = "H20";

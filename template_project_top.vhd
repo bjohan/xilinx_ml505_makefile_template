@@ -21,14 +21,15 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 use work.all;
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library UNISIM;
+use UNISIM.VComponents.all;
 
 entity template_project_top is
     Port (  a,b: in  STD_LOGIC_VECTOR (1 downto 0);
@@ -40,7 +41,16 @@ entity template_project_top is
         serial2_tx : out STD_LOGIC;
         serial2_rx : in STD_LOGIC;
         serial1_tx : out STD_LOGIC; --Connected to db9
-        serial1_rx : in STD_LOGIC --Connected to db9
+        serial1_rx : in STD_LOGIC; --Connected to db9
+
+
+        phy_rxclk : in STD_LOGIC;
+        phy_txclk : in STD_LOGIC;
+        phy_txc_gtxclk : out STD_LOGIC;
+        phy_reset : out STD_LOGIC;
+        phy_mdio : inout STD_LOGIC;
+        phy_mdc : out STD_LOGIC;
+        phy_int : in STD_LOGIC
 );
 end template_project_top;
 
@@ -88,6 +98,9 @@ architecture Behavioral of template_project_top is
     signal clk_int : std_logic;
     signal rst : std_logic;
     signal tx : std_logic;
+
+    signal phy_data_to_phy : std_logic;
+    signal phy_data_from_phy : std_logic;
 begin
     serial2_tx <= serial2_rx;
     serial1_tx <= tx;
@@ -103,6 +116,24 @@ begin
     led_4 <= rst;
     hdr_6 <= tx;
     rst <= not rst_in;
+
+
+
+    phy_txc_gtxclk <= '0';
+    phy_reset <= '0';
+    --phy_mdio <= '0';
+    phy_mdc <= '0';
+
+    phy_data_to_phy <= '0';
+
+    i_mdiobuf : IOBUF
+    port map(
+        t => '1',
+        io => phy_mdio,
+        i => phy_data_to_phy,
+        o => phy_data_from_phy
+    );
+
 
     i_clk: clk
     port map (
