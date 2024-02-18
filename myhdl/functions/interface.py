@@ -83,10 +83,10 @@ class FrameReaderThread(threading.Thread):
             try:
                 d = self.reader.read()
                 if len(d):
-                    print("Got", d)
                     self.deescaper.addData(d)
                     frame = self.deescaper.getFrame()
                     if frame is not None:
+                        #print("Got", frame)
                         self.frameMapper.processFrame(frame)
             except TimeoutError:
                 pass
@@ -114,7 +114,7 @@ class FrameWriterThread(threading.Thread):
             try:
                 frame = self.q.get(timeout=0.1)
                 encoded = self.escaper.generateEscapedrame(frame)
-                print("Sending", encoded)
+                #print("Sending", encoded)
                 self.writer.write(encoded)
             except queue.Empty:
                 pass
@@ -156,6 +156,7 @@ class InitHelper:
         if self.rxFrames >= 4:
             if self.isComplete():
                 print("Got all initialization frames in", time.time()-self.t0)
+                print(self.frames)
                 return True
         return False
 
@@ -195,9 +196,10 @@ class FrameMapper:
     def buildFunctionMap(self, frames):
         for frame in frames:
             addr, payload = self.getAddressAndPayload(frame)
+            print("frame", frame, "address", addr, "payload", payload)
             if len(addr) == 0:
                 pass
-                #print("Loopback frame", frame)
+                print("Loopback frame", frame)
             else:
                 if addr not in self.functionMap:
                     self.functionMap[addr] = functions.functions.functionMap[int.from_bytes(payload)](addr, self.writer)

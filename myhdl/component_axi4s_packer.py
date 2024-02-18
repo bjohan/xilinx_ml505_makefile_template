@@ -4,7 +4,8 @@ t_State = enum('S_GET_INPUT', 'S_SHIFTING', 'S_WAIT_LAST', 'S_TRANSFER_OUT');
 
 @block
 def axi4s_packer(reset, clk, o, in_regs, in_valid ,in_ready_o, txOne):
-    num = int(len(in_regs)/len(o.data))
+    ww = len(o.data)
+    num = int(len(in_regs)/ww)
     state = Signal(t_State.S_GET_INPUT)
     n = Signal(intbv(0, min=0, max = num+1))
     nToTx = Signal(intbv(0, min=0, max = num+1)) 
@@ -23,29 +24,31 @@ def axi4s_packer(reset, clk, o, in_regs, in_valid ,in_ready_o, txOne):
             o.last.next = 0
             o.valid.next = 0
             if in_ready and in_valid:
-                if txOne:
+                if txOne or num == 1:
                     nToTx.next = 1
+                    o.last.next = 1
                 else:
                     nToTx.next = num
-                in_regs_r.next = in_regs
+                    o.last.next = 0
+                in_regs_r.next = in_regs >> ww
                 in_ready.next = 0
                 state.next = t_State.S_SHIFTING
-                o.data.next = in_regs_r.next[len(o.data):0]
+                o.data.next = in_regs[ww:0]
                 o.valid.next = 1
-                o.last.next = txOne
 
         if state == t_State.S_SHIFTING:
-            o.valid.next = 1
             if o.ready and n != nToTx:
+                in_regs_r.next = in_regs_r >> ww
+                #for j in range(num-1):
+                #    topBit = (j+2)*ww
+                #    midBit = (j+1)*ww
+                #    lowBit = (j)*ww
+                #    in_regs_r.next[midBit:lowBit] = in_regs_r[topBit:midBit]
+
                 if n+1 == nToTx-1:
                     o.last.next = 1
 
-                for j in range(num-1):
-                    topBit = (j+2)*len(o.data)
-                    midBit = (j+1)*len(o.data)
-                    lowBit = (j)*len(o.data)
-                    in_regs_r.next[midBit:lowBit] = in_regs_r[topBit:midBit]
-                o.data.next = in_regs_r.next[len(o.data):0]
+                o.data.next = in_regs_r[ww:0]
                 n.next = n.next + 1
                 if n == nToTx-1:
                     state.next = t_State.S_GET_INPUT

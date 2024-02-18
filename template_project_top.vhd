@@ -60,6 +60,10 @@ architecture Behavioral of template_project_top is
     signal rx_data_valid : std_logic;
     signal rx_data_ready : std_logic;
 
+    signal rxb_data : unsigned(7 downto 0);
+    signal rxb_data_valid : std_logic;
+    signal rxb_data_ready : std_logic;
+
     signal i_framed_data : unsigned(7 downto 0);
     signal i_framed_valid : std_logic;
     signal i_framed_ready : std_logic;
@@ -120,58 +124,72 @@ begin
             o_ready => rx_data_ready
         );
 
-    --i_axis_last_deescaper: entity work.axi4s_last_deescaper
-    --    port map(
-    --        reset => rst,
-    --        clk => clk_usr,
-    --        frameError => open,
-    --        i_data => rx_data,
-    --        i_valid => rx_data_valid,
-    --        i_ready => rx_data_ready,
-    --        o_data => i_framed_data,
-    --        o_valid => i_framed_valid,
-    --        o_ready => i_framed_ready,
-    --        o_last => i_framed_last
-    --    );
+    i_skid: entity work.axi4s_skidbuf
+        port map(
+            reset => rst,
+            clk => clk_usr,
+            i_data => rx_data,
+            i_valid => rx_data_valid,
+            i_ready => rx_data_ready,
+            i_last => '0',
+            o_data => rxb_data,
+            o_valid => rxb_data_valid,
+            o_ready => rxb_data_ready,
+            o_last => open
+        );
+
+    i_axis_last_deescaper: entity work.axi4s_last_deescaper
+        port map(
+            reset => rst,
+            clk => clk_usr,
+            frameError => open,
+            i_data => rxb_data,
+            i_valid => rxb_data_valid,
+            i_ready => rxb_data_ready,
+            o_data => i_framed_data,
+            o_valid => i_framed_valid,
+            o_ready => i_framed_ready,
+            o_last => i_framed_last
+        );
     
-    --i_test_application_str: entity work.test_application_str
-    --    port map(
-    --        reset => rst,
-    --        clk => clk_usr,
-    --        i_data => i_framed_data,
-    --        i_valid => i_framed_valid,
-    --        i_ready => i_framed_ready,
-    --        i_last => i_framed_last,
-    --        o_data => o_framed_data,
-    --        o_valid => o_framed_valid,
-    --        o_ready => o_framed_ready,
-    --        o_last => o_framed_last
-    --    );       
+    i_test_application_str: entity work.test_application_str
+        port map(
+            reset => rst,
+            clk => clk_usr,
+            i_data => i_framed_data,
+            i_valid => i_framed_valid,
+            i_ready => i_framed_ready,
+            i_last => i_framed_last,
+            o_data => o_framed_data,
+            o_valid => o_framed_valid,
+            o_ready => o_framed_ready,
+            o_last => o_framed_last
+        );       
     --o_framed_data <= i_framed_data;
     --o_framed_valid <= i_framed_valid;
-    --o_framed_ready <= i_framed_ready;
+    --i_framed_ready <= o_framed_ready;
     --o_framed_last <= i_framed_last;
 
-    --i_axis_last_escaper: entity work.axi4s_last_escaper
-    --    port map(
-    --        reset => rst,
-    --        clk => clk_usr,
-    --        i_data => o_framed_data,
-    --        i_valid => o_framed_valid,
-    --        i_ready => o_framed_ready,
-    --        i_last => o_framed_last,
-    --        o_data => buf_data,
-    --        o_valid => buf_data_valid,
-    --        o_ready => buf_data_ready
-    --    );
+    i_axis_last_escaper: entity work.axi4s_last_escaper
+        port map(
+            reset => rst,
+            clk => clk_usr,
+            i_data => o_framed_data,
+            i_valid => o_framed_valid,
+            i_ready => o_framed_ready,
+            i_last => o_framed_last,
+            o_data => buf_data,
+            o_valid => buf_data_valid,
+            o_ready => buf_data_ready
+        );
 
     --buf_data <= i_framed_data;
     --buf_data_valid <= i_framed_valid;
     --i_framed_ready <= buf_data_ready;
 
-    buf_data <= rx_data;
-    buf_data_valid <= rx_data_valid;
-    rx_data_ready <= buf_data_ready;
+    --buf_data <= rxb_data;
+    --buf_data_valid <= rxb_data_valid;
+    --rxb_data_ready <= buf_data_ready;
 
     i_fifo : entity work.axi4s_fifo
         port map(

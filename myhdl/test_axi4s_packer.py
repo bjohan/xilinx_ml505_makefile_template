@@ -80,7 +80,6 @@ def test_axi4s_packer():
             writeWait.next = 0
             valid.next = 1
             if data == 0xC2C1C0:
-                print("HEJ", data)
                 txOne.next = 1
             yield clk.posedge
             writeBlocked.next = 1

@@ -76,6 +76,7 @@ class DebugCore:
     
     def setup(self, frame):
         (fid, self.width, self.depth)=struct.unpack("III", frame[0:12])
+        print("frame", frame, fid, self.width, self.depth)
         if fid != functionId['debug_core']:
             raise ValueError("Invalid function id for debug core")
         #print("Setup debugcore with bus width:", self.width, "fifo depth:", self.depth)

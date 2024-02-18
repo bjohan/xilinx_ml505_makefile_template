@@ -12,8 +12,9 @@ t_FifoState = enum('S_IDLE', 'S_FILLING', 'S_FULL');
 @block
 def function_debug_core(reset, clk, i, o, debug, depth):
     bw = len(i.data) #bus width 
-    myFunctionId = Signal(intbv(functionId['debug_core'])[len(i.data):]) 
+    #myFunctionId = Signal(intbv(functionId['debug_core'])[len(i.data):]) 
     hww = 32 #Header word witdth
+    myFunctionId = Signal(intbv(functionId['debug_core'])[hww:]) 
     nHeaderWords = 3
     nHeaderBits = nHeaderWords*hww
     headerStart = 0
@@ -83,7 +84,7 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                 if nWords == 1 and outWords[bw:0] == modbv(-1)[bw:]:
                     #Send obligatory broadcast response that is a package only containning function id
                     state.next = t_State.S_BC_RESP1
-                    inWords.next[bw:0] = myFunctionId
+                    inWords.next[hww:0] = myFunctionId
                     inValid.next = 1
                     txOne.next = 1
                     outReady.next = 1
