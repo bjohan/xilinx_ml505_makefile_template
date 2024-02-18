@@ -152,7 +152,7 @@ begin
             o_last => i_framed_last
         );
     
-    i_test_application_str: entity work.test_application_str
+    i_application_test_str: entity work.application_test_str
         port map(
             reset => rst,
             clk => clk_usr,

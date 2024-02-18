@@ -1,7 +1,10 @@
-COMPONENTS = $(wildcard test_*.py)
-VCDS = $(COMPONENTS:.py=.vcd)
-NAMES_WITH_SUFFIX = $(patsubst test_%,% ,$(COMPONENTS))
+COMPONENTS = $(wildcard component_*.py)
+TESTS = $(wildcard test_*.py)
+VCDS = $(TESTS:.py=.vcd)
+NAMES_WITH_SUFFIX = $(patsubst component_%,% ,$(COMPONENTS))
 VHDLS = $(patsubst %.py, %.vhd, $(NAMES_WITH_SUFFIX))
+
+$(info $(COMPONENTS))
 
 SIMULATION_SOURCES = $(wildcard simulation_*.py)
 SIMULATION_VCDS = $(SIMULATION_SOURCES:.py=.vcd)
@@ -44,7 +47,7 @@ vhdls: $(VHDLS)
 
 simulations: $(SIMULATION_VCDS)
 
-interactives: $(INTERACTIVES)
+interactives: $(INTERACTIVE_VCDS)
 
 all: tests vhdls simulations interactives
 

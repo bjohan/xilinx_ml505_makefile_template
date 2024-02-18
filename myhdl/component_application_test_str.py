@@ -8,7 +8,7 @@ from component_function_debug_core import function_debug_core
 
 
 @block
-def test_application_str(reset, clk, i, o):
+def application_test_str(reset, clk, i, o):
     funcaddr= 0x01
     funcaddr2= 0x03
     debug = Signal(modbv(0)[73:0])
