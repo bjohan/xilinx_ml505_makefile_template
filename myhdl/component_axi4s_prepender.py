@@ -5,7 +5,7 @@ t_State = enum('S_IDLE', 'S_PREPEND', 'S_TRANSFER');
 
 @block
 def axi4s_prepender(reset, clk, i, o, prep):
-
+    ww = len(i.data)
     tReadyOut = Signal(False)
     tValidOut = Signal(False)
     transferOut = Signal(False)
@@ -15,6 +15,7 @@ def axi4s_prepender(reset, clk, i, o, prep):
     num = Signal(intbv(0, min = 0, max = len(prep)/len(i.data)+1));
     intValidOut = Signal(False)
     tLastOut = Signal(False)
+    prepData = Signal(modbv(0)[len(prep):])
  
     @always_comb
     def out_reg():
@@ -33,7 +34,7 @@ def axi4s_prepender(reset, clk, i, o, prep):
             
         else:
             tReadyOut.next = 0
-            o.data.next = prep[(num+1)*len(i.data):num*len(i.data)]
+            o.data.next = prepData[ww:]
             tValidOut.next = intValidOut
             tLastOut.next = 0
         
@@ -42,12 +43,14 @@ def axi4s_prepender(reset, clk, i, o, prep):
     def logic():
         if state == t_State.S_IDLE:
             if i.valid == 1:
+                prepData.next = prep
                 intValidOut.next = 1
                 state.next = t_State.S_PREPEND
                 num.next = 0
                 transfer.next = 0
         if state == t_State.S_PREPEND:
             if transferOut:
+                prepData.next = prepData >> ww
                 if num == len(prep)/len(i.data)-1:
                     state.next = t_State.S_TRANSFER
                     transfer.next = 1

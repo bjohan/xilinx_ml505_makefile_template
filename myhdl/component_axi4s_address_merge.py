@@ -13,11 +13,13 @@ def axi4s_address_merge(reset, clk,
     state = Signal(t_State.S_POLL_THROUGH) #main state
     muxState = Signal(t_MuxState.S_POLL) #control mux for main trasfers
 
+    addressSignal = Signal(intbv(address)[len(o.data):])
+
     #internal signalfor input
     iReadyInt = Signal(True)
 
     prepended = Axi4sInterface(len(through.data))
-    prepender_inst = axi4s_prepender(reset, clk, merge, prepended, intbv(address)[len(o.data):])
+    prepender_inst = axi4s_prepender(reset, clk, merge, prepended, addressSignal)
 
     @always_comb
     def bypass_transfer():

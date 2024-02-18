@@ -52,12 +52,13 @@ def function_debug_core(reset, clk, i, o, debug, depth):
     fifoDataRead = Signal(False)
     fifoDataValid = Signal(False)
     fifoDataEmpty = Signal(False)
+    fifoDataNew = Signal(False)
       
     
     i_unpacker = axi4s_unpacker(reset, clk, i, outWords, outValid, outReady, nWords, tooLong)
     i_packer = axi4s_packer(reset, clk, o, inWords, inValid, inReady, txOne)
     i_trigger = configurable_trigger(debug, andMask, orMask, triggedAnd, triggedOr)
-    i_dpbram_fifo=dpbram_fifo(reset, clk, debug, fifoWrite, fifoReady, fifoDataOut, fifoDataRead, fifoDataValid, fifoDataEmpty, depth)
+    i_dpbram_fifo=dpbram_fifo(reset, clk, debug, fifoWrite, fifoReady, fifoDataOut, fifoDataRead, fifoDataValid, fifoDataEmpty, fifoDataNew, depth)
 
     @always_comb
     def out_reg():

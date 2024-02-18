@@ -14,9 +14,10 @@ def test_dpbram_fifo():
     ready = Signal(False)
     valid = Signal(False)
     empty = Signal(False)
+    new = Signal(False)
     
     nWords = 16;
-    dpbram_fifo_inst = dpbram_fifo(reset, clk, din,we, ready, dout, re, valid, empty, nWords)
+    dpbram_fifo_inst = dpbram_fifo(reset, clk, din,we, ready, dout, re, valid, empty, new, nWords)
     @always(delay(10))
     def clkgen():
         clk.next = not clk
@@ -40,17 +41,24 @@ def test_dpbram_fifo():
 
         print("Starting to generate pattern")
         for a in range(nWords+30):
-            #yield clk.posedge
+            we.next = 1
+            din.next = a+100;
+            yield clk.posedge
             while not ready:
-                #print("Full when trying to write", a)
                 yield clk.posedge
             wref.next = a
-            din.next = a;
-            #print("data", a, "wref", wref ,"ready", ready)
-            we.next = 1
-            yield clk.posedge
             we.next = 0
-            #yield clk.posedge
+
+    @instance
+    def compare():
+        for a in range(nWords+30):
+            while not new:
+                yield clk.posedge
+            if int(dout) != int(a+100):
+                print("data", int(a+100), "does not match. was:", int(dout))
+            else:
+                print("data", int(a+100), "does MATCH. was:", int(dout))
+            yield clk.posedge
 
     @instance
     def stimulus_read():
@@ -62,21 +70,20 @@ def test_dpbram_fifo():
         for i in range(40):
             yield clk.posedge
         for a in range(nWords+30):
-            rref.next = a
             re.next = 1
             yield clk.posedge
             while not valid:
                 yield clk.posedge
-            if valid:
-                if int(dout) != int(rref):
-                    print("data", int(rref), "does not match. was:", int(dout))
             re.next = 0
+            if a == 40:
+                for q in range(4):
+                    yield clk.posedge
             #yield clk.posedge
 
         
         raise StopSimulation("Simulation stopped")
 
-    return clkgen, monitor, dpbram_fifo_inst, stimulus_write, stimulus_read
+    return clkgen, monitor, dpbram_fifo_inst, stimulus_write, stimulus_read, compare
 
 tb = test_dpbram_fifo();
 tb.config_sim(trace=True)

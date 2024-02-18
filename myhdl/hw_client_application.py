@@ -1,9 +1,14 @@
-from tcp import TcpClient
+import serial
 from functions.interface import FunctionInterface
+import time
 
 print("Creating client")
-cli = TcpClient("localhost", 8080)
-iface = FunctionInterface(cli, cli)
+cli = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1) 
+cli.write(b"\xc0\x030123456789")
+print(cli.read(10))
+
+quit()
+#iface = FunctionInterface(cli, cli)
 print("Interface created")
 try:
     print("Arming and reading debug core 0")

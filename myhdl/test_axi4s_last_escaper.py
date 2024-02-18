@@ -4,12 +4,12 @@ from interface_axi4s import Axi4sInterface
 
 from component_axi4s_last_escaper import axi4s_last_escaper
 
-dataToWrite = [   0xA0, 0xA1, 0xC0, 0xA3, 0xB0, 0xB1,                             0xB2, 0xB3, 0xC0,                               0xC0, 0xC2, 0xC3,                      0xc0]
-writeDelays = [   0,    0,    0,    1,    0,    0,                                4,    0,    0,                                  0,    0,    0,                        0]
-writeLast   = [   0,    0,    0,    0,    0,    1,                                0,    0,    1,                                  0,    0,    1,                        1]
-dataToRead =  [   0xA0, 0xA1, 0xC0, 0xC0, 0xA3, 0xB0, 0xC0, 0x03,  0xB1,          0xB2, 0xB3, 0xC0, 0x03, 0xC0, 0xC0,             0xC0, 0xC0, 0xC2, 0xC0, 0x03, 0xC3,   0xC0, 0x3, 0xC0, 0xC0]
-readDelays  = [   0,    3,    0,    0,    1,    0,    0,    0,     1,             0,    0,    4,    0,    0,    0,                0,    0,    0,    0,    0,    2,      0,    0,   0,    0]
-readLast   =  [   0,    0,    0,    0,    0,    0,    0,    0,     1,             0,    0,    0,    0,    0,    1,                0,    0,    0,    0,    0,    1,      0,    0,   0,    1]
+dataToWrite = [0xFF,               0xA0, 0xA1, 0xC0, 0xA3, 0xB0, 0xB1,                             0xB2, 0xB3, 0xC0,                               0xC0, 0xC2, 0xC3,                      0xc0]
+writeDelays = [0,                  0,    0,    0,    1,    0,    0,                                4,    0,    0,                                  0,    0,    0,                        0]
+writeLast   = [1,                  0,    0,    0,    0,    0,    1,                                0,    0,    1,                                  0,    0,    1,                        1]
+dataToRead =  [0xC0, 0x03, 0xFF,   0xA0, 0xA1, 0xC0, 0xC0, 0xA3, 0xB0, 0xC0, 0x03,  0xB1,          0xB2, 0xB3, 0xC0, 0x03, 0xC0, 0xC0,             0xC0, 0xC0, 0xC2, 0xC0, 0x03, 0xC3,   0xC0, 0x3, 0xC0, 0xC0]
+readDelays  = [5,    5,    5,      0,    3,    0,    0,    1,    0,    0,    0,     1,             0,    0,    4,    0,    0,    0,                0,    0,    0,    0,    0,    2,      0,    0,   0,    0]
+readLast   =  [0,    0,    1,      0,    0,    0,    0,    0,    0,    0,    0,     1,             0,    0,    0,    0,    0,    1,                0,    0,    0,    0,    0,    1,      0,    0,   0,    1]
 @block
 def test_axi4s_last_escaper():
 

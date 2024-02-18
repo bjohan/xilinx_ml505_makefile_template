@@ -10,10 +10,10 @@ t_MuxState = enum('S_POLL', 'S_THROUGH', 'S_MERGE')
 
 @block
 def axi4s_address_branch(reset, clk, i_prev, o_prev, i_func, o_func, funcaddr, i_next, o_next):
-    addrDelim = Signal(modbv(-1)[len(i_prev.data):])
+    addrDelim2 = Signal(modbv(-1)[len(i_prev.data):])
     o_func_prepend = Axi4sInterface(len(i_prev.data))
     addr_switch_inst = axi4s_address_switch(reset, clk, i_prev, i_func, funcaddr, o_next)
-    prepender_inst = axi4s_prepender(reset, clk, o_func, o_func_prepend, addrDelim)
+    prepender_inst = axi4s_prepender(reset, clk, o_func, o_func_prepend, addrDelim2)
     addr_merge_inst = axi4s_address_merge(reset, clk, i_next, o_func_prepend, funcaddr, o_prev)
     
     return addr_switch_inst, prepender_inst, addr_merge_inst

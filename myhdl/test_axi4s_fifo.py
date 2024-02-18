@@ -4,8 +4,8 @@ from component_axi4s_fifo import axi4s_fifo
 
 test_data =     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]
 test_last =     [0,    0,    0,    0,    0,    0,    0,    1,    0,    0,    0,    1]
-test_delay_in = [0,    0,    1,    1,    0,    0,    3,    0,    0,    0,    0,    0]
-test_delay_out =[1,    2,    3,    1,    0,    0,    3,    0,    0,    0,    0,    0]
+test_delay_in = [10,    10,    10,    10,    0,    0,    3,    0,    0,    0,    0,    0]
+test_delay_out =[10,    20,    30,    1,    0,    0,    3,    0,    0,    0,    0,    0]
 
 
 @block

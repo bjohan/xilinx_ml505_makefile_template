@@ -1,67 +1,55 @@
 from myhdl import *
-
+from interface_axi4s import Axi4sInterface, tbTransmitSequence
 
 from component_rs232tx import rs232tx
+
+test_data =     [0xFF, 0xAA, 0x00, 0x01, 0x55, 0xFF, 0xF0, 0x0F]
+test_last =     [0,    0,    0,    0,    0,    0,    0,    0]
+test_delay_in = [0,    0,    1,    1,    0,    0,    3,    0]
+
 @block
 def test_rs232tx():
-
-    clk = Signal(False)
-    toTx = Signal(intbv(0xAA, min=0, max=256))
-    txValid = Signal(False)
-    txReady = Signal(False)
-    txBusy = Signal(False)
-    txd = Signal(False)
-    #reset = ResetSignal(True)
     reset = ResetSignal(0, active=1, isasync=False)
+    clk = Signal(False)
+    i = Axi4sInterface(8)
+    txd = Signal(False)
+
+    rs232tx_inst = rs232tx(reset, clk, i, txd, 5)
 
     @always(delay(10))
     def clkgen():
         clk.next = not clk
 
-    rs232tx_inst = rs232tx(reset, toTx, txValid, txReady, txBusy, txd, clk, 5)
+    @always(delay(10))
+    def clkgen():
+        clk.next = not clk
 
     @instance
-    def stimulus():
-        print("Synchronous reset")
+    def monitor():
+        for i in range(10000):
+            yield clk.posedge
+        print("Simulation did not end successfully")
+        quit(-1)
+
+    @instance
+    def gen_reset():
         reset.next = 1
         for i in range(3):
-            yield clk.negedge
-        reset.next = False
-        print("Waiting 3 clks")
-        for i in range(3):
-            yield clk.negedge
-        print("Starting to transmit")
-        for b in [0xAA, 0x00, 0x01, 0x55, 0xFF, 0xF0, 0x0F]:
-            print("wainting for txready")
-            if not txReady:
-                yield txReady.posedge
-            print("Transmitting data")
-            yield clk.negedge
-            print("sending", b)
-            toTx.next = b
-            txValid.next = True
-            print("Waiting for ack")
-            yield txReady.negedge, delay(30)
-            if txReady:
-                raise StopSimulation("txValid did not deassert")
-            yield clk.negedge
-            print("Deasserting")
-            txValid.next = False
-        print("wainting for txready")
-        if not txReady:
-            yield txReady.posedge
-        print("extra clocks")
-        for i in range(3):
-            yield clk.negedge
-        print("stop simulation")
-        raise StopSimulation("Simulation stopped")
+            yield clk.posedge
+        reset.next = 0
+        yield clk.posedge
 
-    return clkgen, rs232tx_inst, stimulus
+    @instance
+    def write():
+        yield reset.negedge
+        yield tbTransmitSequence(clk, i, test_data, test_last, test_delay_in);
+        if not i.ready:
+            yield i.ready.posedge
+        yield clk.posedge
+        raise StopSimulation("Simulation ended successfully")
+
+    return clkgen, gen_reset, monitor, rs232tx_inst, write
 
 tb = test_rs232tx();
 tb.config_sim(trace=True)
 tb.run_sim();
-#traceSignals.name = "test_rs232tx"
-#t = traceSignals(test_rs232tx)
-#sim = Simulation(t)
-#sim.run()

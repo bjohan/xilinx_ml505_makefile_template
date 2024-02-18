@@ -35,8 +35,9 @@ def interactive_test_application(conn):
     def monitor():
         for i in range(100000):
             yield clk.posedge
-        print("Simulation did not end successfully")
-        quit(-1)
+        raise StopSimulation("Simulation did not end successfully")
+        #print("Simulation did not end successfully")
+        #quit(-1)
 
     @instance
     def gen_reset():
@@ -56,3 +57,4 @@ print("Got connection, starting simulation")
 tb = interactive_test_application(conn);
 tb.config_sim(trace=True)
 tb.run_sim();
+print("Simulation done")
