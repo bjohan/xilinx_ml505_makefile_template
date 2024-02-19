@@ -31,7 +31,7 @@ def test_mdio_interface():
 
     @instance
     def monitor():
-        for i in range(800):
+        for i in range(2000):
             yield clk.posedge
         print("Simulation did not end successfully")
         quit(-1)
@@ -49,6 +49,9 @@ def test_mdio_interface():
         yield reset.negedge
         if busy:
             yield busy.negedge
+        yield clk.posedge
+        yield clk.posedge
+        yield clk.posedge
         yield clk.posedge
         rw.next = 0
         start.next = 1
