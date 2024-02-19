@@ -13,9 +13,9 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
     state = Signal(t_State.S_IDLE)
 
     if len(phyAddr) != 5:
-        raise TypeError("phyAddr must be 5 bits long")
+        raise TypeError("phyAddr must be 5 bits long. Current length is %d"%(len(phyAddr)))
     if len(regAddr) != 5:
-        raise TypeError("regAddr must be 5 bits long")
+        raise TypeError("regAddr must be 5 bits long. Current length is %d"%(len(regAddr)))
     if len(dataWrite) != 16:
         raise TypeError("dataWrite must be 16 bits long")
 
@@ -70,8 +70,9 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
                         busy.next = 0
                         state.next = t_State.S_IDLE
                         t.next = 0
-                    if currentBit+1 == commandBits and readFlag:
+                    if currentBit+1 >= commandBits and readFlag:
                         t.next = 1
+                        o.next = 0
                     if currentBit > commandBits+1 and readFlag:
                         dataReads.next = dataReads << 1
                         dataReads.next[0] = i

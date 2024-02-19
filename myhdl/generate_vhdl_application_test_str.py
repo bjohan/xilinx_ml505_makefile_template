@@ -10,7 +10,12 @@ def convert_axi4s_application_test_str(hdl):
     streamIn = Axi4sInterface(8)
     streamOut = Axi4sInterface(8) 
 
-    application_test_str_inst = application_test_str(reset, clk, streamIn, streamOut )
+    mdio_in = Signal(True)
+    mdio_out = Signal(False)
+    mdio_tristate = Signal(False)
+    mdio_clk = Signal(False)
+
+    application_test_str_inst = application_test_str(reset, clk, streamIn, streamOut, mdio_in, mdio_out, mdio_tristate, mdio_clk)
 
     application_test_str_inst.convert(hdl=hdl);
 

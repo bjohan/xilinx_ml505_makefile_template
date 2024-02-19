@@ -33,7 +33,7 @@ simulation_%.vcd: simulation_%.py $(PYTHON)
 	$(PYTHON) $<
 	rm -f $(@:.vcd=.*.*.vcd)
 
-interactive_%.vcd: interactive_%.py client_%.py $(PYTHON)
+interactive_%.vcd: interactive_%.py client_%.py $(PYTHON) $(COMPONENTS)
 	$(PYTHON) $<&
 	sleep 0.5
 	$(PYTHON) $(word 2, $^)

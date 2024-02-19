@@ -10,6 +10,15 @@ cli = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)
 iface = FunctionInterface(cli, cli)
 print("Interface created")
 try:
+    mdio = iface.frameMapper.functionMap[b'\x05']
+    phyAddr = 7
+    print("Reading register 1")
+    print(mdio.readRegister(phyAddr, 1))
+    print("Writing register 1")
+    mdio.writeRegister(phyAddr, 2, 0x137f)
+    print("Reading register 1")
+    print(mdio.readRegister(phyAddr, 1))
+
     print("Arming and reading debug core 0")
     dbg = iface.frameMapper.functionMap[b'\x01']
     dbg.setAndMask('1'*73)

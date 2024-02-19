@@ -99,6 +99,7 @@ architecture Behavioral of template_project_top is
     signal rst : std_logic;
     signal tx : std_logic;
 
+    signal mdio_tristate : std_logic;
     signal phy_data_to_phy : std_logic;
     signal phy_data_from_phy : std_logic;
 begin
@@ -122,13 +123,13 @@ begin
     phy_txc_gtxclk <= '0';
     phy_reset <= '0';
     --phy_mdio <= '0';
-    phy_mdc <= '0';
+    --phy_mdc <= '0';
 
-    phy_data_to_phy <= '0';
+    --phy_data_to_phy <= '0';
 
     i_mdiobuf : IOBUF
     port map(
-        t => '1',
+        t => mdio_tristate,
         io => phy_mdio,
         i => phy_data_to_phy,
         o => phy_data_from_phy
@@ -194,7 +195,12 @@ begin
             o_data => o_framed_data,
             o_valid => o_framed_valid,
             o_ready => o_framed_ready,
-            o_last => o_framed_last
+            o_last => o_framed_last,
+
+            mdio_in => phy_data_from_phy,
+            mdio_out => phy_data_to_phy,
+            mdio_tristate => mdio_tristate,
+            mdio_clk => phy_mdc
         );       
     --o_framed_data <= i_framed_data;
     --o_framed_valid <= i_framed_valid;

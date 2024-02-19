@@ -24,7 +24,6 @@ def axi4s_unpacker(reset, clk, i, out_regs_o, out_valid_o, readyIn, words, tooLo
             readyOut.next = 1
             if i.valid and readyOut and n != num:
                 if i.last:
-                    out_valid.next = 1
                     readyOut.next = 0
                     stat.next = t_State.S_SHIFT_REST
                 for j in range(num-1):
@@ -39,7 +38,7 @@ def axi4s_unpacker(reset, clk, i, out_regs_o, out_valid_o, readyIn, words, tooLo
                     stat.next = t_State.S_WAIT_LAST
                     if i.last:
                         readyOut.next = 0
-                        #out_valid.next = 1
+                        out_valid.next = 1
                         stat.next = t_State.S_TRANSFER_OUT
 
         if stat == t_State.S_WAIT_LAST:
@@ -66,6 +65,7 @@ def axi4s_unpacker(reset, clk, i, out_regs_o, out_valid_o, readyIn, words, tooLo
                 out_regs.next[midBit:lowBit] = out_regs[topBit:midBit]
             out_regs.next[len(i.data)*num:len(i.data)*(num-1)]=0
             if n == num-1:
+                out_valid.next = 1
                 stat.next = t_State.S_TRANSFER_OUT
                 out_valid.next = 1
             else:

@@ -6,6 +6,9 @@ cli = TcpClient("localhost", 8080)
 iface = FunctionInterface(cli, cli)
 print("Interface created")
 try:
+    mdio = iface.frameMapper.functionMap[b'\x05']
+    print(mdio.readRegister(3, 1))
+    print(mdio.writeRegister(4, 2, 0x137f))
     print("Arming and reading debug core 0")
     dbg = iface.frameMapper.functionMap[b'\x01']
     dbg.setAndMask('1'*73)
