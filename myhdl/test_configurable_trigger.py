@@ -7,10 +7,9 @@ def test_configurable_trigger():
     reset = ResetSignal(0, active=1, isasync=False)
     
     dataIn = Signal(modbv(0)[4:])
-    andMask = Signal(modbv(0)[4:])
-    orMask = Signal(modbv(0)[4:])
-    trigAnd = Signal(False)
-    trigOr = Signal(False)
+    compare = Signal(modbv(0)[4:])
+    care = Signal(modbv(0)[4:])
+    trigged = Signal(False)
 
     @always(delay(10))
     def clkgen():
@@ -19,7 +18,7 @@ def test_configurable_trigger():
         else:
             clk.next = 1
 
-    configurable_trigger_inst = configurable_trigger(dataIn, andMask, orMask, trigAnd, trigOr)
+    configurable_trigger_inst = configurable_trigger(reset, clk, dataIn, compare, care, trigged)
 
     @instance
     def monitor():
@@ -34,8 +33,8 @@ def test_configurable_trigger():
             yield clk.posedge
 
         reset.next = 0
-        andMask.next = 0b0101
-        orMask.next = 0b1010
+        compare.next = 0b0001
+        care.next = 0b0111
 
         for i in range(3):
             yield clk.posedge

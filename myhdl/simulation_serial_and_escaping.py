@@ -29,6 +29,12 @@ def simulation_serial_and_escaping():
     ser_out = Signal(True)
     frameError = Signal(False)
 
+
+    mdio_in = Signal(False)
+    mdio_out = Signal(False)
+    mdio_tristate = Signal(False)
+    mdio_clk = Signal(False)
+
     i = Axi4sInterface(8)
     toskid = Axi4sInterface(8)
     todeesc = Axi4sInterface(8)
@@ -42,7 +48,7 @@ def simulation_serial_and_escaping():
     rs232rx_input_inst = rs232rx(reset, clk, toskid, ser_in, baudDiv)
     skidbuffer_inst = axi4s_skidbuf(reset, clk, toskid, todeesc)
     deescaper_inst = axi4s_last_deescaper(reset, clk, todeesc, framed, frameError, 0xc0, 0x03)
-    app_inst = application_test_str(reset, clk, framed, appout)
+    app_inst = application_test_str(reset, clk, framed, appout, mdio_in, mdio_out, mdio_tristate, mdio_clk)
     fifo_inst = axi4s_fifo(reset, clk, appout, buffered, 1024)
     escaper_inst = axi4s_last_escaper(reset, clk, buffered, totx, 0xc0, 0x03)
     rs232tx_output_inst = rs232tx(reset, clk, totx, ser_out, baudDiv)

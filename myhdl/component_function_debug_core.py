@@ -25,8 +25,8 @@ def function_debug_core(reset, clk, i, o, debug, depth):
 
     state = Signal(t_State.S_IDLE)
     maxWords = nHeaderWords*int(hww/len(i.data))+math.ceil(len(debug)/len(i.data))
-    andMask = Signal(modbv(-1)[len(debug):])
-    orMask = Signal(modbv(-1)[len(debug):])
+    referenceWord = Signal(modbv(-1)[len(debug):])
+    careMask = Signal(modbv(-1)[len(debug):])
     inWords = Signal(intbv(0)[maxWords*bw:])
     inValid = Signal(False)
     inReady = Signal(False)
@@ -40,10 +40,8 @@ def function_debug_core(reset, clk, i, o, debug, depth):
     tooLong = Signal(False)
     txOne = Signal(False)
 
-    triggedAnd = Signal(False)
-    triggedOr = Signal(False)
+    triggerTrigged = Signal(False)
     armAnd = Signal(False)
-    armOr = Signal(False)
     trigged = Signal(False)
 
     fifoState = Signal(t_FifoState.S_IDLE)
@@ -58,12 +56,12 @@ def function_debug_core(reset, clk, i, o, debug, depth):
     
     i_unpacker = axi4s_unpacker(reset, clk, i, outWords, outValid, outReady, nWords, tooLong)
     i_packer = axi4s_packer(reset, clk, o, inWords, inValid, inReady, txOne)
-    i_trigger = configurable_trigger(debug, andMask, orMask, triggedAnd, triggedOr)
+    i_trigger = configurable_trigger(reset, clk, debug, referenceWord, careMask, triggerTrigged)
     i_dpbram_fifo=dpbram_fifo(reset, clk, debug, fifoWrite, fifoReady, fifoDataOut, fifoDataRead, fifoDataValid, fifoDataEmpty, fifoDataNew, depth)
 
     @always_comb
     def out_reg():
-       trigged.next = (triggedAnd and armAnd) or (triggedOr and armOr)
+       trigged.next = (triggerTrigged and armAnd)
        fifoWrite.next = ((fifoState == t_FifoState.S_IDLE) and trigged) or (fifoState == t_FifoState.S_FILLING)
  
     @always_seq(clk.posedge, reset=reset)
@@ -89,14 +87,13 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                     txOne.next = 1
                     outReady.next = 1
                 elif outWords[hww:0] == 0x00000001 and nWords == maxWords:
-                    andMask.next = outWords[debugEnd:debugStart]
+                    referenceWord.next = outWords[debugEnd:debugStart]
                     outReady.next = 1
                 elif outWords[hww:0] == 0x00000002 and nWords == maxWords:
-                    orMask.next = outWords[debugEnd:debugStart]
+                    careMask.next = outWords[debugEnd:debugStart]
                     outReady.next = 1
                 elif outWords[hww:0] == 0x00000003 and nWords == maxWords:
                     armAnd.next = outWords[hww]
-                    armOr.next = outWords[hww+1]
                     outReady.next = 1
                 else:
                     outReady.next = 1
@@ -105,7 +102,6 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                 state.next = t_State.S_TRANSMIT_FIFO
                 currentWord.next = 0
                 armAnd.next = 0
-                armOr.next = 0
                 fifoState.next = t_FifoState.S_IDLE
 
         if state == t_State.S_BC_RESP1:

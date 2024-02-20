@@ -79,7 +79,7 @@ class DebugCore:
         #print("frame", frame, fid, self.width, self.depth)
         if fid != functionId['debug_core']:
             raise ValueError("Invalid function id for debug core")
-        #print("Setup debugcore with bus width:", self.width, "fifo depth:", self.depth)
+        print("Setup debugcore with bus width:", self.width, "fifo depth:", self.depth)
 
     def put(self, frame):
         self.q.put(frame)
@@ -98,25 +98,21 @@ class DebugCore:
             payload.append(d[0])
         return bytes(payload)
 
-    def setAndMask(self, mask):
+    def setReferenceWord(self, mask):
         header = struct.pack("III", 0x00000001, 0, 0)
         data = self.dataStringToWordsPayload(mask)
         #print(len(header+data),len(header), len(data), len(mask))
         frame = self.addr+header+data;
         self.writer.writeFrame(frame)
         
-    def setOrMask(self, mask):
+    def setCareMask(self, mask):
         header = struct.pack("III", 0x00000002, 0, 0)
         data = self.dataStringToWordsPayload(mask)
         frame = self.addr+header+data;
         self.writer.writeFrame(frame)
         
-    def setArm(self, trigOnAnd=True, trigOnOr=True):
-        av = 0;
-        if trigOnAnd:
-            av+=1
-        if trigOnOr:
-            av+=2
+    def setArm(self):
+        av = 1;
         header = struct.pack("III", 0x00000003, av, 0)
         data = self.dataStringToWordsPayload(self.width*'0')
         frame = self.addr+header+data;
@@ -126,7 +122,11 @@ class DebugCore:
         count = 0
         data = []
         while True:
-            payload = self.q.get()
+            try:
+                payload = self.q.get(timeout=1)
+            except queue.Empty:
+                print("Timeout after", len(data), "words")
+                return data
             (fid, length, current) = struct.unpack("III", payload[0:12])
             tword = list(payload[12:])
             tword.reverse()
@@ -138,6 +138,7 @@ class DebugCore:
 
     def dumpVcd(self, fileName):
         dbdat = self.receiveData();
+        print("Got", len(dbdat), "words of data")
         vg = VcdGenerator("1ps")
         f = open(fileName, 'w')
         f.write(vg.getVcdString(dbdat))

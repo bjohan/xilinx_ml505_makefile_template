@@ -198,9 +198,9 @@ begin
             o_last => o_framed_last,
 
             mdio_in => phy_data_from_phy,
-            mdio_out => phy_data_to_phy,
-            mdio_tristate => mdio_tristate,
-            mdio_clk => phy_mdc
+            mdio_out_o => phy_data_to_phy,
+            mdio_tristate_o => mdio_tristate,
+            mdio_clk_o => phy_mdc
         );       
     --o_framed_data <= i_framed_data;
     --o_framed_valid <= i_framed_valid;

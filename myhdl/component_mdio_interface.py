@@ -5,7 +5,7 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
 
     t_State = enum('S_IDLE', 'S_TRANSFER');
 
-    preamble = Signal(modbv(1)[32:])
+    preamble = Signal(modbv(-1)[32:])
     start = Signal(modbv(1)[2:])
     write = Signal(modbv(1)[2:])
     read = Signal(modbv(2)[2:])
