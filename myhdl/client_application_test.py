@@ -13,8 +13,8 @@ try:
     dbg2.setReferenceWord('1000')
     dbg2.setCareMask('1000')
     dbg2.setArm()
-    print(mdio.readRegister(3, 1))
-    print(mdio.writeRegister(4, 2, 0x137f))
+    print(mdio.readRegister(7, 1))
+    print(mdio.writeRegister(7, 1, 0x137f))
     dbg2.dumpVcd('mdio.vcd')
 
     #mdio = iface.frameMapper.functionMap[b'\x05']

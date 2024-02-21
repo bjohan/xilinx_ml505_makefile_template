@@ -81,7 +81,7 @@ class FrameReaderThread(threading.Thread):
             if self.stopEvent.is_set():
                 break
             try:
-                d = self.reader.read()
+                d = self.reader.read(1)
                 if len(d):
                     self.deescaper.addData(d)
                     frame = self.deescaper.getFrame()

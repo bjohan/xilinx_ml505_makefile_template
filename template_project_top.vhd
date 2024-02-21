@@ -121,7 +121,7 @@ begin
 
 
     phy_txc_gtxclk <= '0';
-    phy_reset <= '0';
+    phy_reset <= '1'; --inverted
     --phy_mdio <= '0';
     --phy_mdc <= '0';
 

@@ -1,9 +1,9 @@
 import serial
 from functions.interface import FunctionInterface
 import time
-
+import random
 print("Creating client")
-cli = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1) 
+cli = serial.Serial('/dev/ttyUSB0', 115200, timeout=1) 
 #cli.write(b"\xc0\x030123456789")
 #print(cli.read(10))
 #quit()
@@ -15,9 +15,14 @@ try:
     dbg2.setReferenceWord('1000')
     dbg2.setCareMask('1000')
     dbg2.setArm()
+    #for rr in random.sample(range(32), 32):
+    #    print("register", rr, "value", mdio.readRegister(7, rr))
+    #    time.sleep(0.1)
     print(mdio.readRegister(7, 1))
     print(mdio.writeRegister(7, 2, 0x137f))
     dbg2.dumpVcd('mdio.vcd')
+    for rr in range(32):
+        print("register", rr, "value", mdio.readRegister(7, rr))
 
     #mdio = iface.frameMapper.functionMap[b'\x05']
     #phyAddr = 7

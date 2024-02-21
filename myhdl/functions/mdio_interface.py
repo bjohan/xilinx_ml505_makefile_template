@@ -17,6 +17,8 @@ class MdioInterface:
     def readRegister(self, phyAddr, regAddr):
         word = 1+(phyAddr<<1)+(regAddr<<6)
         payload = struct.pack("I", word)
+        with self.q.mutex:
+            self.q.queue.clear()
         self.writer.writeFrame(self.addr+bytes(payload))
         responsePayload = self.q.get()
         d = struct.unpack("I", responsePayload)

@@ -13,7 +13,7 @@ def application_test_str(reset, clk, i, o, mdio_in, mdio_out_o, mdio_tristate_o,
     mdio_out_r = Signal(False)
     mdio_tristate_r = Signal(False)
     mdio_clk_r = Signal(False)
-    mdio_out = Signal(False)
+    mdio_out = Signal(True)
     mdio_tristate = Signal(False)
     mdio_clk = Signal(False)
     funcaddr= 0x01

@@ -37,6 +37,8 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
 
     @always_seq(clk.posedge, reset=reset)
     def logic():
+        if reset:
+            o.next = 1
         if not reset:
             if state == t_State.S_IDLE:
                 if rw:
@@ -70,9 +72,9 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
                         busy.next = 0
                         state.next = t_State.S_IDLE
                         t.next = 0
-                    if currentBit+1 >= commandBits and readFlag:
+                    if currentBit == commandBits and readFlag:
                         t.next = 1
-                        o.next = 0
+                        o.next = 1
                     if currentBit > commandBits+1 and readFlag:
                         dataReads.next = dataReads << 1
                         dataReads.next[0] = i
