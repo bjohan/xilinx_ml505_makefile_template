@@ -34,6 +34,8 @@ use UNISIM.VComponents.all;
 entity template_project_top is
     Port (  a,b: in  STD_LOGIC_VECTOR (1 downto 0);
         clk_in, rst_in : in std_logic;
+        clk_fpga_p : in std_logic;
+        clk_fpga_n : in std_logic;
         agreatb, led_1, led_2, led_3, led_4 : out  STD_LOGIC;
         hdr_2 : out STD_LOGIC;
         hdr_4 : out STD_LOGIC;
@@ -55,16 +57,6 @@ entity template_project_top is
 end template_project_top;
 
 architecture Behavioral of template_project_top is
-
-    component clk
-    port(
-        clkin_in : in std_logic;
-        RST_IN : in std_logic;
-        CLKIN_IBUFG_OUT : out std_logic;
-        CLKOUT0_OUT : out std_logic;
-        LOCKED_OUT : out std_logic
-     );
-     end component;
 
     signal rx_data : unsigned(7 downto 0);
     signal rx_data_valid : std_logic;
@@ -96,12 +88,15 @@ architecture Behavioral of template_project_top is
     signal cnt : unsigned(24 downto 0);
     signal clk_usr : std_logic;
     signal clk_int : std_logic;
+    --signal clk_fpga : std_logic;
     signal rst : std_logic;
     signal tx : std_logic;
 
     signal mdio_tristate : std_logic;
     signal phy_data_to_phy : std_logic;
     signal phy_data_from_phy : std_logic;
+    signal clk_enet : std_logic;
+    signal locked_clk_enet : std_logic;
 begin
     serial2_tx <= serial2_rx;
     serial1_tx <= tx;
@@ -111,8 +106,8 @@ begin
     p2 <= a(1) and a(0) and (not b(0));
     led_2 <= cnt(22);
     --hdr_2 <= serial1_rx;
-    hdr_2 <= '0';
-    hdr_4 <= '0';
+    hdr_2 <= clk_usr;
+    hdr_4 <= clk_enet;
     led_3 <= '1';
     led_4 <= rst;
     hdr_6 <= tx;
@@ -135,8 +130,14 @@ begin
         o => phy_data_from_phy
     );
 
+    --i_ibufds : IBUFDS
+    --port map(
+    --    i => clk_fpga_p,
+    --    ib => clk_fpga_n,
+    --    o => clk_fpga
+    --);
 
-    i_clk: clk
+    i_clk: entity work.clk
     port map (
         clkin_in => clk_in, 
             RST_IN => rst, 
@@ -144,6 +145,15 @@ begin
             CLKOUT0_OUT => clk_usr, 
             LOCKED_OUT => led_1
         );
+
+    i_clk_125_enet : entity work.clk_125_enet
+    port map(
+        clkin1_p_in => clk_fpga_p,
+        clkin1_n_in => clk_fpga_n,
+        rst_in => rst,
+        clkout0_out => clk_enet,
+        locked_out => locked_clk_enet
+    );
 
     i_rs232rx: entity work.rs232rx 
         port map(
