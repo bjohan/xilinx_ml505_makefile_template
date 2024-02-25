@@ -124,16 +124,17 @@ class DebugCore:
         while True:
             try:
                 payload = self.q.get(timeout=1)
+                (fid, length, current) = struct.unpack("III", payload[0:12])
+                tword = list(payload[12:])
+                tword.reverse()
+                tword = bytes(tword)
+                data.append(bitstring.BitArray(reversed(list(bitstring.BitArray(tword)))))
+                if length -1 == current:
+                    break
             except queue.Empty:
                 print("Timeout after", len(data), "words")
-                return data
-            (fid, length, current) = struct.unpack("III", payload[0:12])
-            tword = list(payload[12:])
-            tword.reverse()
-            tword = bytes(tword)
-            data.append(bitstring.BitArray(reversed(list(bitstring.BitArray(tword)))))
-            if length -1 == current:
-                break
+                if len(data):
+                    return data
         return data
 
     def dumpVcd(self, fileName):

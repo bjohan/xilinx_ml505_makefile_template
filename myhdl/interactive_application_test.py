@@ -23,10 +23,10 @@ def interactive_application_test(conn):
     mdio_tristate = Signal(False)
     mdio_clk = Signal(False)
 
-
+    debug0 = Signal(modbv(0)[16:])
     i_stdin = tcp_rx(reset, clk, streamIn, conn)
     i_axi4s_last_deescaper = axi4s_last_deescaper(reset, clk, streamIn, streamInDeescaped, frameError, 0xc0, 0x03)
-    application_test_str_inst = application_test_str(reset, clk, streamInDeescaped, streamOut, mdio_in, mdio_out, mdio_tristate, mdio_clk)
+    application_test_str_inst = application_test_str(reset, clk, streamInDeescaped, streamOut, mdio_in, mdio_out, mdio_tristate, mdio_clk, debug0)
     i_axi4s_last_escaper = axi4s_last_escaper(reset, clk, streamOut, streamOutEscaped, 0xc0, 0x03)
     i_stdout = tcp_tx(reset, clk, streamOutEscaped, conn)
 

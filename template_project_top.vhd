@@ -46,13 +46,26 @@ entity template_project_top is
         serial1_rx : in STD_LOGIC; --Connected to db9
 
 
-        phy_rxclk : in STD_LOGIC;
-        phy_txclk : in STD_LOGIC;
-        phy_txc_gtxclk : out STD_LOGIC;
         phy_reset : out STD_LOGIC;
         phy_mdio : inout STD_LOGIC;
         phy_mdc : out STD_LOGIC;
-        phy_int : in STD_LOGIC
+        phy_int : in STD_LOGIC;
+
+        phy_crs : in std_logic;
+        phy_col : in std_logic;
+        phy_rxclk : in std_logic;
+        phy_rxer : in std_logic;
+        phy_rxctl_rxdv : in std_logic;
+        phy_rxd : in STD_LOGIC_VECTOR(7 downto 0);
+        phy_txc_gtxclk : out std_logic;
+        phy_txclk : in std_logic;
+        phy_txer : out std_logic;
+        phy_txctl_txen : out std_logic;
+        phy_txd : out STD_LOGIC_VECTOR(7 downto 0)
+        --sgmii_rx_p : in std_logic;
+        --sgmii_rx_n : in std_logic;
+        --sgmii_tx_p : out std_logic;
+        --sgmii_tx_n : out std_logic
 );
 end template_project_top;
 
@@ -86,6 +99,7 @@ architecture Behavioral of template_project_top is
 
     signal p0, p1, p2 : std_logic;
     signal cnt : unsigned(24 downto 0);
+    signal clk_usr2 : std_logic;
     signal clk_usr : std_logic;
     signal clk_int : std_logic;
     --signal clk_fpga : std_logic;
@@ -97,6 +111,8 @@ architecture Behavioral of template_project_top is
     signal phy_data_from_phy : std_logic;
     signal clk_enet : std_logic;
     signal locked_clk_enet : std_logic;
+
+    signal debug0 : unsigned(15 downto 0);
 begin
     serial2_tx <= serial2_rx;
     serial1_tx <= tx;
@@ -112,7 +128,6 @@ begin
     led_4 <= rst;
     hdr_6 <= tx;
     rst <= not rst_in;
-
 
 
     phy_txc_gtxclk <= '0';
@@ -142,7 +157,7 @@ begin
         clkin_in => clk_in, 
             RST_IN => rst, 
             CLKIN_IBUFG_OUT=> clk_int, --(CLKIN_IBUFG_OUT), 
-            CLKOUT0_OUT => clk_usr, 
+            CLKOUT0_OUT => clk_usr2, 
             LOCKED_OUT => led_1
         );
 
@@ -154,13 +169,14 @@ begin
         clkout0_out => clk_enet,
         locked_out => locked_clk_enet
     );
-
+    clk_usr <= clk_enet;
     i_rs232rx: entity work.rs232rx 
         port map(
             reset => rst,
             clk => clk_usr,
             rxd => serial1_rx,
-            baudDiv => to_unsigned(859, 24),
+            --baudDiv => to_unsigned(859, 24),
+            baudDiv => to_unsigned(1085, 24),
             o_data => rx_data,
             o_valid => rx_data_valid,
             o_ready => rx_data_ready
@@ -210,7 +226,9 @@ begin
             mdio_in => phy_data_from_phy,
             mdio_out_o => phy_data_to_phy,
             mdio_tristate_o => mdio_tristate,
-            mdio_clk_o => phy_mdc
+            mdio_clk_o => phy_mdc,
+
+            debug0 => debug0
         );       
     --o_framed_data <= i_framed_data;
     --o_framed_valid <= i_framed_valid;
@@ -261,13 +279,22 @@ begin
             reset => rst,
             clk => clk_usr,
             txd => tx,
-            baudDiv => to_unsigned(859, 24),
+            --baudDiv => to_unsigned(859, 24),
+            baudDiv => to_unsigned(1085, 24),
             i_data => tx_data,
             i_valid => tx_data_valid,
             i_ready => tx_data_ready
         );
 
 
+    phy_txd <= phy_rxd;
+    phy_txctl_txen <= phy_rxctl_rxdv;
+    phy_txer <= phy_rxer;
+
+    debug0(0) <= phy_rxctl_rxdv;
+    debug0(8 downto 1) <= unsigned(phy_rxd);
+    debug0(9) <= phy_rxer;
+    debug0(15 downto 10) <= "000000";
 
 p_counter : process(clk_usr)
 begin

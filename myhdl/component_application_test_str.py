@@ -9,7 +9,7 @@ from interface_axi4s import Axi4sInterface
 
 
 @block
-def application_test_str(reset, clk, i, o, mdio_in, mdio_out_o, mdio_tristate_o, mdio_clk_o):
+def application_test_str(reset, clk, i, o, mdio_in, mdio_out_o, mdio_tristate_o, mdio_clk_o, debug0):
     mdio_out_r = Signal(False)
     mdio_tristate_r = Signal(False)
     mdio_clk_r = Signal(False)
@@ -19,7 +19,7 @@ def application_test_str(reset, clk, i, o, mdio_in, mdio_out_o, mdio_tristate_o,
     funcaddr= 0x01
     funcaddr2= 0x03
     funcaddr3= 0x05
-    debug0 = Signal(modbv(0)[73:0])
+    #debug0 = Signal(modbv(0)[73:0])
     debug1 = Signal(modbv(0)[4:]) 
 
     i_debug0 = Axi4sInterface(8); 
@@ -60,7 +60,7 @@ def application_test_str(reset, clk, i, o, mdio_in, mdio_out_o, mdio_tristate_o,
         mdio_out_r.next = mdio_out
         mdio_tristate_r.next = mdio_tristate
         mdio_clk_r.next = mdio_clk
-        debug0.next=debug0+1
+        #debug0.next=debug0+1
         #debug1.next=debug1+1
 
     return axi4s_address_branch_inst, debug_core_inst0, axi4s_address_branch_inst2, debug_core_inst1, axi4s_address_branch_inst3, mdio_interface_inst0, logic, comb

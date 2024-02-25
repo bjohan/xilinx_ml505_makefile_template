@@ -45,12 +45,12 @@ try:
     #print("Reading register 1")
     #print(mdio.readRegister(phyAddr, 1))
 
-    #print("Arming and reading debug core 0")
-    #dbg = iface.frameMapper.functionMap[b'\x01']
-    #dbg.setAndMask('1'*73)
-    #dbg.setOrMask('1'*73)
-    #dbg.setArm()
-    #dbg.dumpVcd('test1.vcd')
+    print("Arming and reading debug core 0")
+    dbg = iface.frameMapper.functionMap[b'\x01']
+    dbg.setReferenceWord('0000000000000001')
+    dbg.setCareMask('0000000000000001')
+    dbg.setArm()
+    dbg.dumpVcd('enet.vcd')
 
     #print("Arming and reading debug core 1")
     #dbg2 = iface.frameMapper.functionMap[b'\x03']

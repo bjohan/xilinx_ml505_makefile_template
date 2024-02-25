@@ -14,8 +14,8 @@ def convert_axi4s_application_test_str(hdl):
     mdio_out = Signal(False)
     mdio_tristate = Signal(False)
     mdio_clk = Signal(False)
-
-    application_test_str_inst = application_test_str(reset, clk, streamIn, streamOut, mdio_in, mdio_out, mdio_tristate, mdio_clk)
+    debug0 = Signal(modbv(0)[16:])
+    application_test_str_inst = application_test_str(reset, clk, streamIn, streamOut, mdio_in, mdio_out, mdio_tristate, mdio_clk, debug0)
 
     application_test_str_inst.convert(hdl=hdl);
 
