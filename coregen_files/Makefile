@@ -21,5 +21,5 @@ VHDLS = $(addsuffix .vhd, $(NAMES))
 
 all: $(VHDLS)
 clean:
-	rm -f $(NAMES).asy $(NAMES).cgc $(NAMES)_flist.txt $(NAMES).gise $(NAMES).ngc $(NAMES).vhd $(NAMES).vho $(NAMES).xise $(NAMES)_xmdf.tcl coregen.log
 	rm -rf $(NAMES) tmp xlnx_auto_0_xdb
+	rm -f $(NAMES:=.asy) $(NAMES:=.cgc) $(NAMES:=_flist.txt) $(NAMES:=.gise) $(NAMES:=.ngc) $(NAMES:=.vhd) $(NAMES:=.vho) $(NAMES:=.xise) $(NAMES:=_xmdf.tcl )coregen.log
