@@ -1,19 +1,14 @@
-NET clk_in TNM_NET=input_clk;
-TIMESPEC ts_input_clk = PERIOD input_clk 30.303 ns HIGH 50%; #INPUT_JITTER 312.5ps;
 
 NET "a<1>" LOC = "U25"; #switch 1
 NET "a<0>" LOC = "AG27"; #switch 2
 NET "b<1>" LOC = "AF25"; #switch 3
 NET "b<0>" LOC = "AF26"; #switch 4
 NET "agreatb" LOC = "H18"; #switch led0s
-NET "clk_in" LOC = "AH17"; #CLK 33MHZ FPGA
+NET "clk_in" LOC = "AH17" | IOSTANDARD = LVCMOS33; #CLK 33MHZ FPGA
 NET "clk_fpga_p" LOC = "L19";
 NET "clk_fpga_n" LOC = "K19";
-NET "rst_in" LOC = "E9"; #FPGA_CPU_RESET_B
-NET "led_1" LOC = "L18"; #GPIO_LED_1
-NET "led_2" LOC = "G15"; #GPIO_LED_2
+NET "rst_in" LOC = "E9" | IOSTANDARD = LVCMOS33; #FPGA_CPU_RESET_B
 NET "led_3" LOC = "AD26"; #GPIO_LED_3
-NET "led_4" LOC = "G16"; #GPIO_LED_4
 
 NET "serial2_tx" LOC = "F10"; #FPGA_SERIAL2_TX
 NET "serial2_rx" LOC = "G10"; #FPGA_SERIAL2_TX
@@ -21,40 +16,69 @@ NET "serial2_rx" LOC = "G10"; #FPGA_SERIAL2_TX
 NET "serial1_tx" LOC = "AG20";
 NET "serial1_rx" LOC = "AG15";
 
-NET "hdr_2" LOC = "H33";
-NET "hdr_4" LOC = "F34";
-NET "hdr_6" LOC = "H34";
+NET "serial*" IOSTANDARD = LVCMOS33;
+NET "serial*" SLEW = FAST;
+NET "serial*" TIG;
 
-NET "phy_reset" LOC = "J14";
-NET "phy_mdio" LOC = "H13";
-NET "phy_mdc" LOC = "H19";
-NET "phy_int" LOC = "H20";
 
-NET "phy_crs" LOC = "E34";
-NET "phy_col" LOC = "B32";
-NET "phy_rxclk" LOC = "H17";
-NET "phy_rxer" LOC = "E33";
-NET "phy_rxctl_rxdv" LOC = "E32";
-NET "phy_rxd<0>" LOC = "A33";
-NET "phy_rxd<1>" LOC = "B33";
-NET "phy_rxd<2>" LOC = "C33";
-NET "phy_rxd<3>" LOC = "C32";
-NET "phy_rxd<4>" LOC = "D32";
-NET "phy_rxd<5>" LOC = "C34";
-NET "phy_rxd<6>" LOC = "D34";
-NET "phy_rxd<7>" LOC = "F33";
-NET "phy_txc_gtxclk" LOC = "J16";
-NET "phy_txclk" LOC = "K17";
-NET "phy_txer" LOC = "AJ9";
-NET "phy_txctl_txen" LOC = "AJ10";
-NET "phy_txd<0>" LOC = "AF11";
-NET "phy_txd<1>" LOC = "AE11";
-NET "phy_txd<2>" LOC = "AH9";
-NET "phy_txd<3>" LOC = "AH10";
-NET "phy_txd<4>" LOC = "AG8";
-NET "phy_txd<5>" LOC = "AH8";
-NET "phy_txd<6>" LOC = "AG10";
-NET "phy_txd<7>" LOC = "AG11";
+#BANK3 2.5V
+NET "phy_reset" LOC = "J14" | IOSTANDARD = LVCMOS25;
+NET "phy_mdio" LOC = "H13" | IOSTANDARD = LVCMOS25;
+NET "phy_mdc" LOC = "H19" | IOSTANDARD = LVCMOS25;
+NET "phy_int" LOC = "H20" | IOSTANDARD = LVCMOS25;
+NET "phy_rxclk" LOC = "H17" | IOSTANDARD = LVCMOS25;
+NET "phy_txclk" LOC = "K17" | IOSTANDARD = LVCMOS25;
+NET "led_1" LOC = "L18" | IOSTANDARD = LVCMOS25; #GPIO_LED_1
+NET "led_2" LOC = "G15" | IOSTANDARD = LVCMOS25; #GPIO_LED_2
+NET "led_4" LOC = "G16" | IOSTANDARD = LVCMOS25; #GPIO_LED_4
+NET "phy_txc_gtxclk" LOC = "J16" | IOSTANDARD = LVCMOS25;
+
+#BANK 11
+NET "phy_crs" LOC = "E34" | IOSTANDARD = LVCMOS25;
+NET "phy_col" LOC = "B32" | IOSTANDARD = LVCMOS25;
+NET "phy_rxer" LOC = "E33" | IOSTANDARD = LVCMOS25;
+NET "phy_rxctl_rxdv" LOC = "E32" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<0>" LOC = "A33" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<1>" LOC = "B33" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<2>" LOC = "C33" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<3>" LOC = "C32" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<4>" LOC = "D32" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<5>" LOC = "C34" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<6>" LOC = "D34" | IOSTANDARD = LVCMOS25;
+NET "phy_rxd<7>" LOC = "F33" | IOSTANDARD = LVCMOS25;
+NET "hdr_2" LOC = "H33" | IOSTANDARD = LVCMOS25;
+NET "hdr_4" LOC = "F34" | IOSTANDARD = LVCMOS25;
+NET "hdr_6" LOC = "H34" | IOSTANDARD = LVCMOS25;
+
+#BANK 22
+NET "phy_txd<0>" LOC = "AF11" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<1>" LOC = "AE11" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<2>" LOC = "AH9" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<3>" LOC = "AH10" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<4>" LOC = "AG8" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<5>" LOC = "AH8" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<6>" LOC = "AG10" | IOSTANDARD = LVCMOS25;
+NET "phy_txd<7>" LOC = "AG11" | IOSTANDARD = LVCMOS25;
+NET "phy_txer" LOC = "AJ9" | IOSTANDARD = LVCMOS25;
+NET "phy_txctl_txen" LOC = "AJ10" | IOSTANDARD = LVCMOS25;
+NET "phy_*" SLEW = FAST;
+
+NET clk_in TNM_NET=input_clk;
+NET clk_fpga_p TNM_NET=enet_tx_clk;
+NET clk_fpga_n TNM_NET=enet_tx_clk;
+NET phy_rxclk TNM_NET=enet_rx_clk_tgrp;
+
+NET "phy_rxd[?]" TNM = "phy_rx_signals";
+NET "phy_rxctl_rxdv" TNM = "phy_rx_signals";
+NET "phy_rxer" TNM = "phy_rx_signals";
+
+TIMESPEC ts_input_clk = PERIOD input_clk 30.303 ns HIGH 50%; #INPUT_JITTER 312.5ps;
+TIMESPEC ts_enet_tx = PERIOD enet_tx_clk 8 ns HIGH 50%; #INPUT_JITTER 312.5ps;
+TIMESPEC ts_enet_rx = PERIOD enet_rx_clk_tgrp 8 ns HIGH 50%; #INPUT_JITTER 312.5ps;
+
+TIMEGRP "phy_rx_signals" OFFSET = IN 2.0 VALID 2.0 ns BEFORE "phy_rxclk" RISING;
+
+#Serial transceivers
 #NET "sgmii_rx_p" LOC = "N1";
 #NET "sgmii_rx_n" LOC = "P1";
 #NET "sgmii_tx_p" LOC = "M2";

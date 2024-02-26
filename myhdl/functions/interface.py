@@ -83,6 +83,7 @@ class FrameReaderThread(threading.Thread):
             try:
                 d = self.reader.read(1)
                 if len(d):
+                    #print("Got", d)
                     self.deescaper.addData(d)
                     frame = self.deescaper.getFrame()
                     if frame is not None:

@@ -5,7 +5,7 @@ from interface_axi4s import Axi4sInterface
 def convert_rs232rx(hdl):
     reset = ResetSignal(0, active=1, isasync=True)
     clk = Signal(False)
-    o = Axi4sInterface(8, withLast=False)
+    o = Axi4sInterface(8)
     txd = Signal(True)
     baudDiv = Signal(intbv(min=0, max=2**24))
     rs232rx_inst = rs232rx(reset, clk, o, txd, baudDiv);

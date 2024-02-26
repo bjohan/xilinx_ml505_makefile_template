@@ -113,6 +113,9 @@ architecture Behavioral of template_project_top is
     signal locked_clk_enet : std_logic;
 
     signal debug0 : unsigned(15 downto 0);
+
+    signal cdc_in : std_logic_vector(9 downto 0);
+    signal cdc_out : std_logic_Vector(9 downto 0);
 begin
     serial2_tx <= serial2_rx;
     serial1_tx <= tx;
@@ -122,7 +125,7 @@ begin
     p2 <= a(1) and a(0) and (not b(0));
     led_2 <= cnt(22);
     --hdr_2 <= serial1_rx;
-    hdr_2 <= clk_usr;
+    hdr_2 <= phy_rxclk;
     hdr_4 <= clk_enet;
     led_3 <= '1';
     led_4 <= rst;
@@ -130,7 +133,7 @@ begin
     rst <= not rst_in;
 
 
-    phy_txc_gtxclk <= '0';
+    phy_txc_gtxclk <= clk_enet;
     phy_reset <= '1'; --inverted
     --phy_mdio <= '0';
     --phy_mdc <= '0';
@@ -287,13 +290,37 @@ begin
         );
 
 
+    --i_cdc_fifo : entity work.cdc_fifo
+    --port map (
+    --    rst => rst,
+    --    wr_clk => phy_rxclk,
+    --    rd_clk => phy_txclk,
+    --    din => cdc_in,
+    --    wr_en => phy_rxctl_rxdv,
+    --    rd_en => '1',
+    --    dout => cdc_out,
+    --    full => open,
+    --    empty => open
+    --);
+
+    --cdc_in(7 downto 0) <= phy_rxd;
+    --cdc_in(8) <= phy_rxctl_rxdv;
+    --cdc_in(9) <= phy_rxer;
+
+    --phy_txd <= cdc_out(7 downto 0);
+    --phy_txctl_txen <= cdc_out(8);
+    --phy_txer <= cdc_out(9);
+
     phy_txd <= phy_rxd;
     phy_txctl_txen <= phy_rxctl_rxdv;
     phy_txer <= phy_rxer;
 
     debug0(0) <= phy_rxctl_rxdv;
+    --debug0(0) <= cdc_out(8);
     debug0(8 downto 1) <= unsigned(phy_rxd);
+    --debug0(8 downto 1) <= unsigned(cdc_out(7 downto 0));
     debug0(9) <= phy_rxer;
+    --debug0(9) <= cdc_out(9);
     debug0(15 downto 10) <= "000000";
 
 p_counter : process(clk_usr)

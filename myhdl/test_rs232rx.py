@@ -17,8 +17,8 @@ def test_rs232rx():
     i = Axi4sInterface(8)
     o = Axi4sInterface(8)
     txd = Signal(True)
-    rs232tx_inst = rs232tx(reset, clk, i, txd, 5)
-    rs232rx_inst = rs232rx(reset, clk, o, txd, 5);
+    rs232tx_inst = rs232tx(reset, clk, i, txd, 32)
+    rs232rx_inst = rs232rx(reset, clk, o, txd, 32);
 
     @always(delay(10))
     def clkgen():

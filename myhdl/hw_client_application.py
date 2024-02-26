@@ -28,13 +28,12 @@ try:
     #for rr in random.sample(range(32), 32):
     #    print("register", rr, "value", mdio.readRegister(7, rr))
     #    time.sleep(0.1)
-    print(mdio.readRegister(1))
-    print(mdio.writeRegister(2, 0x137f))
-    #dbg2.dumpVcd('mdio.vcd')
-    for rr in range(32):
-        bv = mdio.readRegister(rr)
-        print("register", rr, "value", bv, intToReadableBinaryString(bv))
-
+    #print(mdio.readRegister(1))
+    #print(mdio.writeRegister(2, 0x137f))
+    ##dbg2.dumpVcd('mdio.vcd')
+    #for rr in range(32):
+    #    bv = mdio.readRegister(rr)
+    #    print("register", rr, "value", bv, intToReadableBinaryString(bv))
     mdio.printConfig()
     #mdio = iface.frameMapper.functionMap[b'\x05']
     #phyAddr = 7
