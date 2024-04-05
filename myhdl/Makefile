@@ -4,7 +4,7 @@ VCDS = $(TESTS:.py=.vcd)
 NAMES_WITH_SUFFIX = $(patsubst component_%,% ,$(COMPONENTS))
 VHDLS = $(patsubst %.py, %.vhd, $(NAMES_WITH_SUFFIX))
 
-$(info $(COMPONENTS))
+#$(info $(COMPONENTS))
 
 SIMULATION_SOURCES = $(wildcard simulation_*.py)
 SIMULATION_VCDS = $(SIMULATION_SOURCES:.py=.vcd)
@@ -21,6 +21,8 @@ $(PYTHON):
 	pyenv/bin/pip install git+https://github.com/myhdl/myhdl.git@master
 	pyenv/bin/pip install getchar
 	pyenv/bin/pip install bitstring
+
+.DELETE_ON_ERROR:
 
 test_%.vcd: test_%.py component_%.py $(PYTHON)
 	$(PYTHON) $<
@@ -49,7 +51,7 @@ simulations: $(SIMULATION_VCDS)
 
 interactives: $(INTERACTIVE_VCDS)
 
-all: tests vhdls simulations interactives
+all: tests vhdls simulations# interactives
 
 clean:
 	rm -f $(VCDS) $(VHDLS) $(SIMULATION_VCDS) $(INTERACTIVE_VCDS) pck_myhdl_011.vhd
