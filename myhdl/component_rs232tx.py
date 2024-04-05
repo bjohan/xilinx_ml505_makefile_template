@@ -1,6 +1,7 @@
 from myhdl import *
 from interface_axi4s import Axi4sInterface
 from component_axi4s_skidbuf import axi4s_skidbuf_no_last
+from component_axi4s_connect import axi4s_connect_no_last
 
 @block
 def rs232tx(reset, clk, i, txd, baudDiv=100):
@@ -12,6 +13,7 @@ def rs232tx(reset, clk, i, txd, baudDiv=100):
 
     ib = Axi4sInterface(len(i.data), withLast=False)
     i_skidbuf = axi4s_skidbuf_no_last(reset, clk, i, ib)
+    #i_skidbuf = axi4s_connect_no_last(i, ib)
 
     @always_comb
     def out_reg():

@@ -1,17 +1,25 @@
 from myhdl import *
 from interface_axi4s import Axi4sInterface
 from component_axi4s_skidbuf import axi4s_skidbuf
+from component_axi4s_connect import axi4s_connect
 @block
-def rs232rx(reset, clk, o, rxd, baudDiv=100):
+def rs232rx(reset, clk, o, rxdi, baudDiv=100):
     baudTick = Signal(False)
-    baudCnt = Signal(intbv(min=0, max=2**24))
+    rxd = Signal(True)
+    rxd0 = Signal(True)
+    rxd1 = Signal(True)
+    baudCnt = Signal(intbv(0, min=0, max=2**24))
     currentBit = Signal(intbv(0, min=0, max=11));
     rxData = Signal(intbv(0)[len(o.data):])
     ob = Axi4sInterface(len(o.data))
     i_skidbuf = axi4s_skidbuf(reset, clk, ob, o)
+    #i_skidbuf = axi4s_connect(ob, o)
 
-    @always(clk.posedge)
+    @always_seq(clk.posedge, reset=reset)
     def logic():
+        rxd1.next = rxdi
+        rxd0.next = rxd1
+        rxd.next = rxd0
         if currentBit > 0:
             baudCnt.next = baudCnt +1;
             if baudCnt == baudDiv:

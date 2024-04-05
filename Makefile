@@ -224,7 +224,9 @@ $(PAF) : $(TARGET).syr $(UCF) $(TARGET).twx $(TARGET).ncd
 plan_ahead : $(PAF)
 	$(call run_xilinx_environment, planAhead -source $(PAF))
 
-
+xilinx_bash :
+	$(call run_xilinx_environment, bash)
+    
 $(CGF): 
 	echo "$$COREGEN_OPTS" > $(CGF)
 
