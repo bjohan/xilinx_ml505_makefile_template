@@ -18,8 +18,7 @@ NET "serial1_rx" LOC = "AG15";
 
 NET "serial*" IOSTANDARD = LVCMOS33;
 NET "serial*" SLEW = FAST;
-NET "serial*" TIG;
-
+#NET "serial*" TIG;
 
 #BANK3 2.5V
 NET "phy_reset" LOC = "J14" | IOSTANDARD = LVCMOS25;
@@ -63,23 +62,31 @@ NET "phy_txer" LOC = "AJ9" | IOSTANDARD = LVCMOS25;
 NET "phy_txctl_txen" LOC = "AJ10" | IOSTANDARD = LVCMOS25;
 NET "phy_*" SLEW = FAST;
 
-NET clk_in TNM_NET=input_clk;
-NET clk_fpga_p TNM_NET=enet_tx_clk;
-NET clk_fpga_n TNM_NET=enet_tx_clk;
-NET phy_rxclk TNM_NET=enet_rx_clk_tgrp;
-
-NET "phy_rxd[?]" TNM = "phy_rx_signals";
-NET "phy_rxctl_rxdv" TNM = "phy_rx_signals";
-NET "phy_rxer" TNM = "phy_rx_signals";
-
-TIMESPEC ts_input_clk = PERIOD input_clk 30.303 ns HIGH 50%; #INPUT_JITTER 312.5ps;
-TIMESPEC ts_enet_tx = PERIOD enet_tx_clk 8 ns HIGH 50%; #INPUT_JITTER 312.5ps;
-TIMESPEC ts_enet_rx = PERIOD enet_rx_clk_tgrp 8 ns HIGH 50%; #INPUT_JITTER 312.5ps;
-
-TIMEGRP "phy_rx_signals" OFFSET = IN 2.0 VALID 2.0 ns BEFORE "phy_rxclk" RISING;
 
 #Serial transceivers
 #NET "sgmii_rx_p" LOC = "N1";
 #NET "sgmii_rx_n" LOC = "P1";
 #NET "sgmii_tx_p" LOC = "M2";
 #NET "sgmii_tx_n" LOC = "N2";
+
+#33MHz input clock
+#NET clk_in TNM_NET=input_clk;
+#TIMESPEC ts_input_clk = PERIOD input_clk 30.303 ns HIGH 50%; #INPUT_JITTER 312.5ps;
+
+
+#200MHz input clock
+NET i_clk_125_enet/CLKIN1_IBUFGDS TNM_NET=clk_fpga_nm;
+TIMESPEC TS_CLK_FPGA_P = PERIOD "clk_fpga_nm" 5 ns HIGH 50 %;
+
+INST i_clk_125_enet/PLL_ADV_INST BANDWIDTH = OPTIMIZED;
+INST i_clk_125_enet/PLL_ADV_INST CLKIN1_PERIOD = 5.000;
+INST i_clk_125_enet/PLL_ADV_INST CLKIN2_PERIOD = 10.000;
+INST i_clk_125_enet/PLL_ADV_INST CLKOUT0_DIVIDE = 8;
+INST i_clk_125_enet/PLL_ADV_INST CLKOUT0_PHASE = 0.000;
+INST i_clk_125_enet/PLL_ADV_INST CLKOUT0_DUTY_CYCLE = 0.500;
+INST i_clk_125_enet/PLL_ADV_INST COMPENSATION = SYSTEM_SYNCHRONOUS;
+INST i_clk_125_enet/PLL_ADV_INST DIVCLK_DIVIDE = 1;
+INST i_clk_125_enet/PLL_ADV_INST CLKFBOUT_MULT = 5;
+INST i_clk_125_enet/PLL_ADV_INST CLKFBOUT_PHASE = 0.0;
+INST i_clk_125_enet/PLL_ADV_INST REF_JITTER = 0.005000;
+
