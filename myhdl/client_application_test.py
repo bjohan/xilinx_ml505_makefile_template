@@ -4,17 +4,22 @@ import queue
 
 print("Creating client")
 cli = TcpClient("localhost", 8080)
+print("Getting interface")
 iface = FunctionInterface(cli, cli)
 print("Interface created")
 try:
 
     mdio = iface.frameMapper.functionMap[b'\x05']
+    print("Setting phy address")
+    mdio.setPhyAddr(7)
+    print("Setting up debug core")
     dbg2 = iface.frameMapper.functionMap[b'\x03']
     dbg2.setReferenceWord('1000')
     dbg2.setCareMask('1000')
     dbg2.setArm()
-    print(mdio.readRegister(7, 1))
-    print(mdio.writeRegister(7, 1, 0x137f))
+    print("Reading phy registers")
+    print(mdio.readRegister(1))
+    print(mdio.writeRegister(1, 0x137f))
     dbg2.dumpVcd('mdio.vcd')
 
     #mdio = iface.frameMapper.functionMap[b'\x05']

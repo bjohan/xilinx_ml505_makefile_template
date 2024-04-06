@@ -144,3 +144,13 @@ class DebugCore:
         f = open(fileName, 'w')
         f.write(vg.getVcdString(dbdat))
         f.close()
+        #f2 = open(fileName+'.bin', 'wb')
+        #for d in dbdat:
+        #    r = bitstring.BitArray(reversed(list(d)))
+        #    print("bits", r)
+        #    v = (r.int>>1)&0xFF
+        #    #print("%02x"%(v))
+        #    #print( (r.int>>1)&0xFF)
+        #    #print(v.to_bytes(1))
+        #    f2.write(v.to_bytes(1))
+        #f2.close()

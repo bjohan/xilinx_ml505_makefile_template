@@ -322,17 +322,17 @@ begin
     phy_txctl_txen <= phy_rxctl_rxdv;
     phy_txer <= phy_rxer;
 
-    --debug0(0) <= phy_rxctl_rxdv;
+    debug0(0) <= phy_rxctl_rxdv;
     --debug0(0) <= cdc_out(8);
-    --debug0(8 downto 1) <= unsigned(phy_rxd);
+    debug0(8 downto 1) <= unsigned(phy_rxd);
     --debug0(8 downto 1) <= unsigned(cdc_out(7 downto 0));
-    --debug0(9) <= phy_rxer;
+    debug0(9) <= phy_rxer;
     --debug0(9) <= cdc_out(9);
     --debug0(10) <= phy_rxclk;
     --debug0(11) <= phy_txclk;
-    --debug0(15 downto 10) <= "000000";
-    debug0(15 downto 0) <= "0000000000000000";
-    debug0(15 downto 0) <= "1111111111111111";
+    debug0(15 downto 10) <= "000000";
+    --debug0(15 downto 0) <= "0000000000000000";
+    --debug0(15 downto 0) <= "1111111111111111";
     --debug0(15 downto 12) <= "0000";
 
 p_counter : process(clk_usr)

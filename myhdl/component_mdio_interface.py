@@ -1,7 +1,7 @@
 from myhdl import *
 
 @block
-def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, dataRead, startTransfer, busy, baudDivHalf=5):
+def mdio_interface(reset, clk, ir, o, t, mdc, rw, phyAddr, regAddr, dataWrite, dataRead, startTransfer, busy, baudDivHalf=5):
 
     t_State = enum('S_IDLE', 'S_TRANSFER');
 
@@ -22,6 +22,7 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
     commandBits = len(preamble)+len(start)+len(write)+len(phyAddr)+len(regAddr)
     totalBits = commandBits+len(turnAround)+len(dataWrite)
     currentBit = Signal(intbv(0, min=0, max=totalBits+1));
+    i = Signal(False)
 
     baudTick = Signal(False)
     baudCnt = Signal(intbv(min=0, max=2**24))
@@ -40,6 +41,7 @@ def mdio_interface(reset, clk, i, o, t, mdc, rw, phyAddr, regAddr, dataWrite, da
         if reset:
             o.next = 1
         if not reset:
+            i.next = ir
             if state == t_State.S_IDLE:
                 if rw:
                     completeWord.next = concat(preamble, start, read, phyAddr, regAddr, turnAround, dataWrite)
