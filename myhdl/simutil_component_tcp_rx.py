@@ -28,9 +28,8 @@ def tcp_rx(reset, clk, o, conn):
                     pass
                 yield clk.posedge
             else:
-                while transfer:
-                    if o.ready:
-                        o.valid.next = 0
-                        transfer.next = 0
-                    yield clk.posedge
+                if o.ready == True:
+                    o.valid.next = 0
+                    transfer.next = 0
+                yield clk.posedge
     return logic

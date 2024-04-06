@@ -32,7 +32,7 @@ def test_function_mdio_interface():
 
     @instance
     def monitor():
-        for i in range(3000):
+        for i in range(5500):
             yield clk.posedge
         print("Simulation did not end successfully")
         quit(0)

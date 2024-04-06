@@ -124,10 +124,10 @@ begin
     p1 <= a(0) and (not b(1)) and (not b(0));
     p2 <= a(1) and a(0) and (not b(0));
     led_2 <= cnt(22);
-    --hdr_2 <= serial1_rx;
-    hdr_2 <= phy_rxclk;
+    hdr_2 <= serial1_rx;
+    --hdr_2 <= phy_rxclk;
     hdr_4 <= clk_enet;
-    led_3 <= '1';
+    led_3 <= locked_clk_enet;
     led_4 <= rst;
     hdr_6 <= tx;
     rst <= not rst_in;
@@ -177,7 +177,7 @@ begin
         port map(
             reset => rst,
             clk => clk_usr,
-            rxd => serial1_rx,
+            rxdi => serial1_rx,
             --baudDiv => to_unsigned(859, 24),
             baudDiv => to_unsigned(1085, 24),
             o_data => rx_data,
@@ -185,28 +185,28 @@ begin
             o_ready => rx_data_ready
         );
 
-    i_skid: entity work.axi4s_skidbuf
-        port map(
-            reset => rst,
-            clk => clk_usr,
-            i_data => rx_data,
-            i_valid => rx_data_valid,
-            i_ready => rx_data_ready,
-            i_last => '0',
-            o_data => rxb_data,
-            o_valid => rxb_data_valid,
-            o_ready => rxb_data_ready,
-            o_last => open
-        );
+    --i_skid: entity work.axi4s_skidbuf
+    --    port map(
+    --        reset => rst,
+    --        clk => clk_usr,
+    --        i_data => rx_data,
+    --        i_valid => rx_data_valid,
+    --        i_ready => rx_data_ready,
+    --        i_last => '0',
+    --        o_data => rxb_data,
+    --        o_valid => rxb_data_valid,
+    --        o_ready => rxb_data_ready,
+    --        o_last => open
+    --    );
 
     i_axis_last_deescaper: entity work.axi4s_last_deescaper
         port map(
             reset => rst,
             clk => clk_usr,
             frameError => open,
-            i_data => rxb_data,
-            i_valid => rxb_data_valid,
-            i_ready => rxb_data_ready,
+            i_data => rx_data,
+            i_valid => rx_data_valid,
+            i_ready => rx_data_ready,
             o_data => i_framed_data,
             o_valid => i_framed_valid,
             o_ready => i_framed_ready,
@@ -232,7 +232,11 @@ begin
             mdio_clk_o => phy_mdc,
 
             debug0 => debug0
-        );       
+        );
+       
+    --phy_data_to_phy <= '0';
+    --phy_mdc <= '0';
+    --mdio_tristate <= '1';
     --o_framed_data <= i_framed_data;
     --o_framed_valid <= i_framed_valid;
     --i_framed_ready <= o_framed_ready;
@@ -287,8 +291,11 @@ begin
             i_data => tx_data,
             i_valid => tx_data_valid,
             i_ready => tx_data_ready
+            --i_data => rx_data,
+            --i_valid => rx_data_valid,
+            --i_ready => rx_data_ready
         );
-
+    --tx <= serial1_rx;
 
     --i_cdc_fifo : entity work.cdc_fifo
     --port map (
@@ -315,13 +322,18 @@ begin
     phy_txctl_txen <= phy_rxctl_rxdv;
     phy_txer <= phy_rxer;
 
-    debug0(0) <= phy_rxctl_rxdv;
+    --debug0(0) <= phy_rxctl_rxdv;
     --debug0(0) <= cdc_out(8);
-    debug0(8 downto 1) <= unsigned(phy_rxd);
+    --debug0(8 downto 1) <= unsigned(phy_rxd);
     --debug0(8 downto 1) <= unsigned(cdc_out(7 downto 0));
-    debug0(9) <= phy_rxer;
+    --debug0(9) <= phy_rxer;
     --debug0(9) <= cdc_out(9);
-    debug0(15 downto 10) <= "000000";
+    --debug0(10) <= phy_rxclk;
+    --debug0(11) <= phy_txclk;
+    --debug0(15 downto 10) <= "000000";
+    debug0(15 downto 0) <= "0000000000000000";
+    debug0(15 downto 0) <= "1111111111111111";
+    --debug0(15 downto 12) <= "0000";
 
 p_counter : process(clk_usr)
 begin

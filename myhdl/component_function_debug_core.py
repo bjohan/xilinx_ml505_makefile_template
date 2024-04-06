@@ -82,7 +82,7 @@ def function_debug_core(reset, clk, i, o, debug, depth):
                 if nWords == 1 and outWords[bw:0] == modbv(-1)[bw:]:
                     #Send obligatory broadcast response that is a package only containning function id
                     state.next = t_State.S_BC_RESP1
-                    inWords.next[hww:0] = myFunctionId
+                    inWords.next[bw:0] = myFunctionId
                     inValid.next = 1
                     txOne.next = 1
                     outReady.next = 1

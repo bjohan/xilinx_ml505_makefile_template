@@ -161,7 +161,18 @@ class InitHelper:
                 return True
         return False
 
-class FrameMapper:
+class FrameBuffer:
+    def __init__(self):
+        self.q = queue.Queue()
+
+    def processFrame(self, frame):
+        self.q.put(frame)
+
+    def getFrame(self, timeout=1):
+        return self.q.get(timeout=timeout)
+        
+
+class MappingFrameBuffer:
     def __init__(self, writer):
         self.writer = writer
         self.init = InitHelper(writer)
@@ -213,7 +224,7 @@ class FunctionInterface:
     def __init__(self, reader, writer):
         """Function interface. reader object with read method to read from fpga. writer has write method to write"""
         self.fw = FrameWriterThread(writer, Escaper(0xc0, 0x03))
-        self.frameMapper = FrameMapper(self.fw)
+        self.frameMapper = MappingFrameBuffer(self.fw)
         self.fr = FrameReaderThread(reader, DeEscaper(0xc0, 0x03), self.frameMapper)
         self.frameMapper.startInitSequence()
         self.frameMapper.waitInitComplete()

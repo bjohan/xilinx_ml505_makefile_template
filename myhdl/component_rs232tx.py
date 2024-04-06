@@ -22,6 +22,8 @@ def rs232tx(reset, clk, i, txd, baudDiv=100):
     @always_seq(clk.posedge, reset=reset)
     def logic():
         if not reset:
+            if currentBit == 0:
+                txd.next=True
             if currentBit > 0:
                 baudCnt.next = baudCnt +1;
                 if baudCnt == baudDiv:

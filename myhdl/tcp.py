@@ -9,7 +9,8 @@ class TcpServerClient:
         self.addr = addr
 
     def recv(self, n=1024):
-        return self.conn.recv(n)
+        d = self.conn.recv(n)
+        return d
 
     def send(self, d):
         return self.conn.send(d)
