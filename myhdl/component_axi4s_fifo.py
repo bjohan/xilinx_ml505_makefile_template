@@ -32,29 +32,28 @@ def axi4s_fifo(reset, clk, i, o, depth):
         
     @always_seq(clk.posedge, reset=reset)
     def logic():
-        if state == t_State.S_READ:
-            #u.valid.next = 0
-            fifo_read.next = 0
-            if fifo_valid and u.ready and u2.ready:
-                state.next = t_State.S_TRANSFER_DIRECT
-                #u.valid.next = 1
-                fifo_read.next = 1
-            if fifo_valid and not u.ready and not u2.ready:
-                state.next = t_State.S_TRANSFER_WAIT
-                #u.valid.next = 1
-                fifo_read.next = 0
-
-        if state == t_State.S_TRANSFER_DIRECT:
-            #u.valid.next = 0
-            fifo_read.next = 0
-            state.next = t_State.S_READ
-            
-        if state == t_State.S_TRANSFER_WAIT:
-            if u.ready and u2.ready:
+        if not reset:
+            if state == t_State.S_READ:
                 #u.valid.next = 0
-                fifo_read.next = 1
+                fifo_read.next = 0
+                if fifo_valid and u.ready and u2.ready:
+                    state.next = t_State.S_TRANSFER_DIRECT
+                    #u.valid.next = 1
+                    fifo_read.next = 1
+                if fifo_valid and not u.ready and not u2.ready:
+                    state.next = t_State.S_TRANSFER_WAIT
+                    #u.valid.next = 1
+                    fifo_read.next = 0
+    
+            if state == t_State.S_TRANSFER_DIRECT:
+                #u.valid.next = 0
+                fifo_read.next = 0
                 state.next = t_State.S_READ
-             
                 
-        
+            if state == t_State.S_TRANSFER_WAIT:
+                if u.ready and u2.ready:
+                    #u.valid.next = 0
+                    fifo_read.next = 1
+                    state.next = t_State.S_READ
+             
     return logic, out_reg, i_fifo, i_skidbuf, i_skidbuf2

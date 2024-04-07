@@ -58,6 +58,7 @@ try:
     dbg.receiveData()
     dbg.dumpVcd('enet.vcd')
     dbg.dumpBinary('enet.bin', slice(8,16, None))
+    dbg.dumpBinary('enetall.bin')
 
     #print("Arming and reading debug core 1")
     #dbg2 = iface.frameMapper.functionMap[b'\x03']

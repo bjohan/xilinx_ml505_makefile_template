@@ -20,6 +20,8 @@ try:
     print("Reading phy registers")
     print(mdio.readRegister(1))
     print(mdio.writeRegister(1, 0x137f))
+    print("Waiting for debugdata")
+    dbg2.receiveData()
     dbg2.dumpVcd('mdio.vcd')
 
     #mdio = iface.frameMapper.functionMap[b'\x05']

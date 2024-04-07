@@ -126,6 +126,8 @@ class DebugCore:
         while True:
             try:
                 payload = self.q.get(timeout=1)
+                if len(data) == 0:
+                    print("Got first debugdata")
                 (fid, length, current) = struct.unpack("III", payload[0:12])
                 tword = list(payload[12:])
                 tword.reverse()
@@ -135,8 +137,7 @@ class DebugCore:
                     break
             except queue.Empty:
                 print("Timeout after", len(data), "words")
-                if len(data):
-                    return data
+                break
         print("Got", len(data), "words of data")
         self.debugData = data
 

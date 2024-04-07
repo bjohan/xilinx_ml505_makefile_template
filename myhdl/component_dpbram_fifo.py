@@ -34,22 +34,23 @@ def dpbram_fifo(reset, clk, din, we, ready_o, dout, re, valid_o, empty_o, newDat
 
     @always_seq(clk.posedge, reset=reset)
     def logic():
-        newR.next = ((not empty) and re and not emptyAfterRead) or (empty and we)
-        newData.next = newR
-        #valid_o.next = 0
-        if w:
-            waddr.next = waddr+1
-            waddrp1.next = waddrp1+1
-            #if empty:
-                #valid_o.next = 1
+        if not reset:
+            newR.next = ((not empty) and re and not emptyAfterRead) or (empty and we)
+            newData.next = newR
+            #valid_o.next = 0
+            if w:
+                waddr.next = waddr+1
+                waddrp1.next = waddrp1+1
+                #if empty:
+                    #valid_o.next = 1
 
-        #readDelay.next = 0
-        if r:
-            raddr.next = raddr+1
-            raddrp1.next = raddrp1+1
-            #valid_o.next = 1
-            #readDelay.next = 1
-        #valid.next = readDelay
+            #readDelay.next = 0
+            if r:
+                raddr.next = raddr+1
+                raddrp1.next = raddrp1+1
+                #valid_o.next = 1
+                #readDelay.next = 1
+            #valid.next = readDelay
 
     return logic, dpbram_inst, ready_empty
 
