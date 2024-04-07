@@ -114,8 +114,9 @@ architecture Behavioral of template_project_top is
 
     signal debug0 : unsigned(15 downto 0);
 
-    signal cdc_in : std_logic_vector(9 downto 0);
-    signal cdc_out : std_logic_Vector(9 downto 0);
+    signal cdc_in : std_logic_vector(11 downto 0);
+    signal cdc_out : std_logic_vector(11 downto 0);
+    signal cdc_empty : std_logic;
 begin
     serial2_tx <= serial2_rx;
     serial1_tx <= tx;
@@ -263,20 +264,24 @@ begin
     --buf_data_valid <= rxb_data_valid;
     --rxb_data_ready <= buf_data_ready;
 
-    i_fifo : entity work.axi4s_fifo
-        port map(
-            reset => rst,
-            clk => clk_usr,
-            i_data => buf_data,
-            i_valid => buf_data_valid,
-            i_ready => buf_data_ready,
-            i_last => '0',
-            o_data => tx_data,
-            o_valid => tx_data_valid,
-            o_ready => tx_data_ready,
-            o_last => open
-        );
+    --i_fifo : entity work.axi4s_fifo
+    --    port map(
+    --        reset => rst,
+    --        clk => clk_usr,
+    --        i_data => buf_data,
+    --        i_valid => buf_data_valid,
+    --        i_ready => buf_data_ready,
+    --        i_last => '0',
+    --        o_data => tx_data,
+    --        o_valid => tx_data_valid,
+    --        o_ready => tx_data_ready,
+    --        o_last => open
+    --    );
 
+
+    tx_data <=buf_data;
+    tx_data_valid <= buf_data_valid;
+    buf_data_ready <= tx_data_ready;
     --tx_data <= rx_data;
     --tx_data_valid <= rx_data_valid;
     --rx_data_ready <= tx_data_ready;
@@ -297,40 +302,55 @@ begin
         );
     --tx <= serial1_rx;
 
-    --i_cdc_fifo : entity work.cdc_fifo
-    --port map (
-    --    rst => rst,
-    --    wr_clk => phy_rxclk,
-    --    rd_clk => phy_txclk,
-    --    din => cdc_in,
-    --    wr_en => phy_rxctl_rxdv,
-    --    rd_en => '1',
-    --    dout => cdc_out,
-    --    full => open,
-    --    empty => open
-    --);
+    i_cdc_fifo : entity work.cdc_fifo
+    port map (
+        rst => rst,
+        wr_clk => phy_rxclk,
+        rd_clk => clk_usr,
+        din => cdc_in,
+        wr_en => '1',
+        rd_en => '1',
+        dout => cdc_out,
+        full => open,
+        empty => cdc_empty
+    );
 
-    --cdc_in(7 downto 0) <= phy_rxd;
-    --cdc_in(8) <= phy_rxctl_rxdv;
-    --cdc_in(9) <= phy_rxer;
+    cdc_in(7 downto 0) <= phy_rxd;
+    
+    cdc_in(8) <= phy_rxctl_rxdv;
+    cdc_in(9) <= phy_rxer;
+    cdc_in(10) <= phy_col;
+    cdc_in(11) <= phy_crs;
 
-    --phy_txd <= cdc_out(7 downto 0);
-    --phy_txctl_txen <= cdc_out(8);
-    --phy_txer <= cdc_out(9);
+    phy_txd <= cdc_out(7 downto 0);
+    phy_txctl_txen <= cdc_out(8);
+    phy_txer <= cdc_out(9);
 
-    phy_txd <= phy_rxd;
-    phy_txctl_txen <= phy_rxctl_rxdv;
-    phy_txer <= phy_rxer;
+    --phy_txd <= phy_rxd;
+    --phy_txctl_txen <= phy_rxctl_rxdv;
+    --phy_txer <= phy_rxer;
 
-    debug0(0) <= phy_rxctl_rxdv;
+    debug0(0) <= cdc_out(8); --dv
+    debug0(1) <= cdc_out(9); --er
+    debug0(2) <= cdc_out(10); --col
+    debug0(3) <= cdc_out(11); --crs
+    debug0(7 downto 4) <= "0000";
+    debug0(8) <= cdc_out(7);
+    debug0(9) <= cdc_out(6);
+    debug0(10) <= cdc_out(5);
+    debug0(11) <= cdc_out(4);
+    debug0(12) <= cdc_out(3);
+    debug0(13) <= cdc_out(2);
+    debug0(14) <= cdc_out(1);
+    debug0(15) <= cdc_out(0);
     --debug0(0) <= cdc_out(8);
-    debug0(8 downto 1) <= unsigned(phy_rxd);
+    --debug0(8 downto 1) <= unsigned(phy_rxd);
     --debug0(8 downto 1) <= unsigned(cdc_out(7 downto 0));
-    debug0(9) <= phy_rxer;
+    --debug0(9) <= phy_rxer;
     --debug0(9) <= cdc_out(9);
     --debug0(10) <= phy_rxclk;
     --debug0(11) <= phy_txclk;
-    debug0(15 downto 10) <= "000000";
+    --debug0(15 downto 10) <= "000000";
     --debug0(15 downto 0) <= "0000000000000000";
     --debug0(15 downto 0) <= "1111111111111111";
     --debug0(15 downto 12) <= "0000";
