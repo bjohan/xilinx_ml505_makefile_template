@@ -4,6 +4,7 @@ import bitstring
 import math
 import string
 import queue
+import copy
 
 class VcdGenerator:
     def __init__(self, timeScale):
@@ -72,6 +73,7 @@ class DebugCore:
         self.q = queue.Queue()
         self.addr = addr
         self.writer = writer
+        self.debugData = None
         #print("Created Debug Core with address:", self.addr)
     
     def setup(self, frame):
@@ -135,22 +137,24 @@ class DebugCore:
                 print("Timeout after", len(data), "words")
                 if len(data):
                     return data
-        return data
+        print("Got", len(data), "words of data")
+        self.debugData = data
 
     def dumpVcd(self, fileName):
-        dbdat = self.receiveData();
-        print("Got", len(dbdat), "words of data")
+        if self.debugData is None:
+            raise RuntimeError("receiveData must be called first")
         vg = VcdGenerator("1ps")
         f = open(fileName, 'w')
-        f.write(vg.getVcdString(dbdat))
+        f.write(vg.getVcdString(self.debugData))
         f.close()
-        #f2 = open(fileName+'.bin', 'wb')
-        #for d in dbdat:
-        #    r = bitstring.BitArray(reversed(list(d)))
-        #    print("bits", r)
-        #    v = (r.int>>1)&0xFF
-        #    #print("%02x"%(v))
-        #    #print( (r.int>>1)&0xFF)
-        #    #print(v.to_bytes(1))
-        #    f2.write(v.to_bytes(1))
-        #f2.close()
+
+    def dumpBinary(self, fileName, slicer=None):
+        if self.debugData is None:
+            raise RuntimeError("receiveData must be called first")
+        
+        f = open(fileName, 'wb')
+        for d in self.debugData:
+            d = copy.deepcopy(d)
+            if slicer is not None:
+                d = d[slicer]
+            d.tofile(f)

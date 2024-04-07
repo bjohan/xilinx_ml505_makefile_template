@@ -3,6 +3,7 @@ from functions.interface import FunctionInterface
 import time
 import random
 import bitstring
+import time
 print("Creating client")
 cli = serial.Serial('/dev/ttyUSB1', 115200, timeout=1) 
 #cli.write(b"\xc0\x030123456789")
@@ -20,12 +21,13 @@ def intToReadableBinaryString(n):
 
 try:
     mdio = iface.frameMapper.functionMap[b'\x05']
-    #mdio.setPhyAddr(7)
+    mdio.setPhyAddr(7)
     dbg2 = iface.frameMapper.functionMap[b'\x03']
     #dbg2.setReferenceWord('1000')
     #dbg2.setCareMask('1000')
     #dbg2.setArm()
     #print("Register 1:", mdio.readRegister(1))
+    print("Read config")
     mdio.printConfig()
     #for rr in range(32):
     #    print("register", rr, "value", mdio.readRegister(rr))
@@ -47,13 +49,15 @@ try:
     #print("Reading register 1")
     #print(mdio.readRegister(phyAddr, 1))
 
-    while True:
-        print("Arming and reading debug core 0")
-        dbg = iface.frameMapper.functionMap[b'\x01']
-        dbg.setReferenceWord('0000000000000001')
-        dbg.setCareMask('0000000000000001')
-        dbg.setArm()
-        dbg.dumpVcd('enet.vcd')
+    #while True:
+    print("Arming and reading debug core 0")
+    dbg = iface.frameMapper.functionMap[b'\x01']
+    dbg.setReferenceWord('0000000000000001')
+    dbg.setCareMask('0000000000000001')
+    dbg.setArm()
+    dbg.receiveData()
+    dbg.dumpVcd('enet.vcd')
+    dbg.dumpBinary('enet.bin', slice(8,16, None))
 
     #print("Arming and reading debug core 1")
     #dbg2 = iface.frameMapper.functionMap[b'\x03']
