@@ -4,8 +4,6 @@ from interface_axi4s import Axi4sInterface
 from component_dpbram_fifo import dpbram_fifo
 from component_axi4s_skidbuf import axi4s_skidbuf
 
-t_State = enum('S_READ', 'S_WAIT', 'S_TRANSFER_DIRECT', 'S_TRANSFER_WAIT');
-
 @block
 def axi4s_ethernet_valid_framer(reset, clk, rxdata, rx_dv, o):
     rxdatar = Signal(intbv(0)[len(rxdata):])

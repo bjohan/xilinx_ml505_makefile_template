@@ -1,5 +1,6 @@
 from myhdl import *
 from interface_axi4s import Axi4sInterface, tbTransmitSequence, tbReceiveSequence
+from component_axi4s_ethernet_frame_check import axi4s_ethernet_frame_check
 from component_axi4s_ethernet_valid_framer import axi4s_ethernet_valid_framer
 import struct
 
@@ -25,17 +26,24 @@ for i in range(len(dat)>>1):
     read_last.append(0)
     test_valid.append(valid)
 
+
 @block
-def test_axi4s_ethernet_valid_framer():
+def test_axi4s_ethernet_frame_check():
     clk = Signal(False)
     reset = ResetSignal(0, active=1, isasync=False)
    
-    o = Axi4sInterface(8);
+    framed = Axi4sInterface(8);
+    checked = Axi4sInterface(8);
  
     rxdata = Signal(intbv(0)[8:])
     rx_dv = Signal(False)
 
-    axi4s_ethernet_valid_framer_inst = axi4s_ethernet_valid_framer(reset, clk, rxdata, rx_dv, o)
+    frame_valid = Signal(False)
+
+    axi4s_ethernet_valid_framer_inst = axi4s_ethernet_valid_framer(reset, clk, rxdata, rx_dv, framed)
+    axi4s_ethernet_frame_check_inst = axi4s_ethernet_frame_check(reset, clk,framed, checked, frame_valid)
+    
+    
 
     @always(delay(10))
     def clkgen():
@@ -62,8 +70,9 @@ def test_axi4s_ethernet_valid_framer():
     @instance
     def read():
         yield reset.negedge
-        yield tbReceiveSequence(clk, o, read_data, read_last, read_delay);
-        raise StopSimulation("Simulation ended successfully")
+        checked.ready.next = 1
+        #yield tbReceiveSequence(clk, o, read_data, read_last, read_delay);
+        #raise StopSimulation("Simulation ended successfully")
 
 
     @instance
@@ -76,10 +85,10 @@ def test_axi4s_ethernet_valid_framer():
             
 
 
-    return clkgen, gen_reset, monitor, axi4s_ethernet_valid_framer_inst, write, read
+    return clkgen, gen_reset, monitor, axi4s_ethernet_frame_check_inst, axi4s_ethernet_valid_framer_inst, write, read
 
 
 
-tb = test_axi4s_ethernet_valid_framer();
+tb = test_axi4s_ethernet_frame_check();
 tb.config_sim(trace=True)
 tb.run_sim();
