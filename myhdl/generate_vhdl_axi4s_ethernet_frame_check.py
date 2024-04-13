@@ -11,8 +11,9 @@ def convert_axi4s_ethernet_frame_check(hdl):
     valid = Signal(False)
     framed = Axi4sInterface(8); 
     checked = Axi4sInterface(8); 
+    frameLength = Signal(intbv(0)[16:])
 
-    axi4s_ethernet_frame_check_inst = axi4s_ethernet_frame_check(reset, clk,framed, checked, valid)
+    axi4s_ethernet_frame_check_inst = axi4s_ethernet_frame_check(reset, clk,framed, checked, valid, frameLength)
     axi4s_ethernet_frame_check_inst.convert(hdl=hdl);
 
 

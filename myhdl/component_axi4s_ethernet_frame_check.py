@@ -5,10 +5,11 @@ from component_dpbram_fifo import dpbram_fifo
 from component_axi4s_skidbuf import axi4s_skidbuf
 
 @block
-def axi4s_ethernet_frame_check(reset, clk, i, o, valid):
+def axi4s_ethernet_frame_check(reset, clk, i, o, valid, frameLength):
     csum = Signal(modbv(0xFFFFFFFF)[32:])
     crcIn = Signal(modbv()[32:])
     crcOut= Signal(modbv()[32:])
+    byteCount = Signal(modbv()[16:])
     first = Signal(True)
     
 
@@ -58,11 +59,16 @@ def axi4s_ethernet_frame_check(reset, clk, i, o, valid):
             if i.valid:
                 if not first:
                     csum.next = crcOut
+                    byteCount.next = byteCount+1
                 else:
                     first.next = False
             if i.last:
                 csum.next = 0xFFFFFFFF
                 first.next = True
+                if byteCount > 3:
+                    frameLength.next = byteCount-3
+                else:
+                    frameLength.next = 0
                 if crcOut == modbv(0xDEBB20E3)[32:]:
                     valid.next = True
                 else:

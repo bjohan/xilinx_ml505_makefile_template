@@ -29,6 +29,7 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
 
     #Registers to connect to memory, data+last
     writeWord =  Signal(intbv(0)[bits+1:])
+    pipeWord =  Signal(intbv(0)[bits+1:])
     readWord =  Signal(intbv(0)[bits+1:])
 
     #Registers for unused memory ports
@@ -82,7 +83,6 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
         i.ready.next = i_readys
         o.valid.next = o_valids
 
-
     @always_seq(clk.posedge, reset=reset)
     def logic():
         #TODO implement non committance if fifo gets full during write
@@ -91,6 +91,7 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
             #pipeline registers
             war.next = comittedAddress
             rar.next = raddr
+            #readWord.next = pipeWord
 
             #Write logic
             if waddrp1 == raddr:
@@ -101,7 +102,7 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
             if w:
                 waddr.next = waddr+1
                 waddrp1.next = waddrp1+1
-                if i.last:
+                if i.last and discard == False:
                     comittedAddress.next = waddr+1
 
             if discard:
@@ -112,8 +113,6 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
             if r:
                 raddr.next = raddr+1
                 lrar.next = rar
-                    
-
 
     return logic, dpbram_inst, combinatorial_logic
 
