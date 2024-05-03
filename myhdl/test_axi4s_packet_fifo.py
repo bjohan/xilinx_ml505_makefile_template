@@ -32,8 +32,10 @@ def test_axi4s_packet_fifo():
     o = Axi4sInterface(8);
 
     discard = Signal(False)
+
+    frameLength = Signal(modbv(0)[16:])
  
-    axi4s_packet_fifo_inst = axi4s_packet_fifo(reset, clk, i, discard, o, 16)
+    axi4s_packet_fifo_inst = axi4s_packet_fifo(reset, clk, i, discard, o, frameLength, 16)
 
     @always(delay(10))
     def clkgen():

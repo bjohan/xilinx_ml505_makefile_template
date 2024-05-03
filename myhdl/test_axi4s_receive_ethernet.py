@@ -1,8 +1,6 @@
 from myhdl import *
 from interface_axi4s import Axi4sInterface, tbTransmitSequence, tbReceiveSequence
-from component_axi4s_ethernet_frame_check import axi4s_ethernet_frame_check
-from component_axi4s_ethernet_valid_framer import axi4s_ethernet_valid_framer
-from component_axi4s_packet_fifo import axi4s_packet_fifo
+from component_axi4s_receive_ethernet import axi4s_receive_ethernet
 import struct
 
 test_data =     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3, 0xaa, 0xbb, 0xcc]
@@ -48,30 +46,19 @@ for i in range(1):
     test_valid+=v
 
 @block
-def test_axi4s_ethernet_frame_check():
+def test_axi4s_receive_ethernet():
     clk = Signal(False)
     reset = ResetSignal(0, active=1, isasync=False)
    
-    framed = Axi4sInterface(8);
-    checked = Axi4sInterface(8);
-    valids = Axi4sInterface(8);
- 
     rxdata = Signal(intbv(0)[8:])
     rx_dv = Signal(False)
 
-    frame_valid = Signal(False)
-    frameLength = Signal(intbv(0)[16:])
-    discard = Signal(False)
+    valids = Axi4sInterface(8);
 
-    axi4s_ethernet_valid_framer_inst = axi4s_ethernet_valid_framer(reset, clk, rxdata, rx_dv, framed)
-    axi4s_ethernet_frame_check_inst = axi4s_ethernet_frame_check(reset, clk,framed, checked, frame_valid, frameLength)
+
     packetLength = Signal(intbv(0)[16:])
-    axi4s_packet_fifo_inst = axi4s_packet_fifo(reset, clk, checked, discard, valids, packetLength, 2048)
+    axi4s_receive_ethernet_inst = axi4s_receive_ethernet(reset, clk, rxdata, rx_dv, valids, packetLength)
     
-    @always_comb
-    def comb():
-        discard.next = (not frame_valid) and checked.last
-
     @always(delay(10))
     def clkgen():
         if clk:
@@ -97,7 +84,8 @@ def test_axi4s_ethernet_frame_check():
     @instance
     def read():
         yield reset.negedge
-        #valids.ready.next = 1
+        valids.ready.next = 1
+        print("done")
         yield tbReceiveSequence(clk, valids, read_data, read_last, read_delay);
         for i in range(10):
             yield clk.posedge
@@ -114,10 +102,10 @@ def test_axi4s_ethernet_frame_check():
             
 
 
-    return comb, clkgen, gen_reset, monitor, axi4s_ethernet_frame_check_inst, axi4s_ethernet_valid_framer_inst, axi4s_packet_fifo_inst, write, read
+    return clkgen, gen_reset, monitor, axi4s_receive_ethernet_inst, write, read
 
 
 
-tb = test_axi4s_ethernet_frame_check();
+tb = test_axi4s_receive_ethernet();
 tb.config_sim(trace=True)
 tb.run_sim();
