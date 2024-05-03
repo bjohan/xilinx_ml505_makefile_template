@@ -2,6 +2,7 @@ from myhdl import *
 
 from interface_axi4s import Axi4sInterface
 from component_dpbram import dpbram
+from component_dpbram_fifo import dpbram_fifo
 from component_axi4s_skidbuf import axi4s_skidbuf
 
 t_State = enum('S_READ', 'S_WAIT', 'S_TRANSFER_DIRECT', 'S_TRANSFER_WAIT');
@@ -10,13 +11,14 @@ t_State = enum('S_READ', 'S_WAIT', 'S_TRANSFER_DIRECT', 'S_TRANSFER_WAIT');
 #uncommitted data will be deleted. if discard is high at the same time as 
 #i.last, data will be discarded.
 @block
-def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
+def axi4s_packet_fifo(reset, clk, i, discard, o, length_out, depth):
     #Constants
     bits=len(i.data)
     
     #Shadow registers for reading outputs
     i_readys = Signal(False)
     o_valids = Signal(False)
+    o_lasts = Signal(False)
 
     #Write address registers
     waddr = Signal(modbv(0, min = 0 , max = depth))
@@ -45,9 +47,20 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
     war = Signal(modbv(0, min = 0 , max = depth)) #Write available, address of data that is actually written and stored in dpbram
     rar = Signal(modbv(0, min = 0 , max = depth)) #read available, address of data that is actually presented on the output of dbpram
     lrar = Signal(modbv(-1, min = 0 , max = depth)) #Last addres, newly read address, no longer "valid"
+
+    #signals for length fifo
+    length_in = Signal(modbv(0, min=0, max=depth))
+    length_in_ready = Signal(False)
+    #length_out = Signal(modbv(0, min=0, max=depth))
+    length_we = Signal(False)
+    length_re = Signal(False)
+    length_out_valid = Signal(False)
+    length_empty = Signal(False)
+    length_new_data = Signal(False)
     
     #instances
     dpbram_inst = dpbram(clk, w, waddr, writeWord, dout_a_notused, clk, wr_b_notused, raddr, din_b_notused, readWord, depth)
+    length_fifo_inst = dpbram_fifo(reset, clk, length_in, length_we, length_in_ready, length_out, length_re, length_out_valid, length_empty, length_new_data, 128)
 
     @always_comb
     def combinatorial_logic():
@@ -55,7 +68,8 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
         writeWord.next[bits:0] = i.data
         writeWord.next[bits] = i.last
         o.data.next=readWord[bits:0]
-        o.last.next=readWord[bits]
+        #o.last.next=readWord[bits]
+        o_lasts.next = readWord[bits]
 
 
         #Logic to determine if write is performed
@@ -63,6 +77,12 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
             w.next = True
         else:
             w.next = False
+
+        if w and i.last and not discard:
+            length_we.next = True
+        else:
+            length_we.next = False
+
 
         #Logic to determine if read is performed
         if o.ready and o_valids:
@@ -82,6 +102,7 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
         #Shadow register assignment
         i.ready.next = i_readys
         o.valid.next = o_valids
+        o.last.next = o_lasts
 
     @always_seq(clk.posedge, reset=reset)
     def logic():
@@ -102,17 +123,32 @@ def axi4s_packet_fifo(reset, clk, i, discard, o, depth):
             if w:
                 waddr.next = waddr+1
                 waddrp1.next = waddrp1+1
+                length_in.next = waddr+1-comittedAddress
                 if i.last and discard == False:
                     comittedAddress.next = waddr+1
+            ##        length_in.next = waddr+1-comittedAddress
+            #        length_we.next = True
+            #    else:
+            #        length_we.next = False
+            #else:
+            #    length_we.next = False
 
             if discard:
                 waddr.next = comittedAddress
                 waddrp1.next = comittedAddress+1
-
             #Read logic
-            if r:
+            #if r:
+            if o.ready and rar != war:
                 raddr.next = raddr+1
                 lrar.next = rar
+            if not o.ready and (lrar != rar) and (rar !=raddr): #Reset read pipeline if ready is not valid
+                raddr.next = lrar
+                rar.next = lrar
 
-    return logic, dpbram_inst, combinatorial_logic
+            if r and o_lasts:
+                length_re.next = True
+            else:
+                length_re.next = False
+
+    return logic, dpbram_inst, length_fifo_inst, combinatorial_logic
 

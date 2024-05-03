@@ -37,12 +37,15 @@ def load_binary_ethernet_file(fn):
     return test_data[1:], read_data[1:], read_last[1:], read_delay[1:], test_valid[1:]
 
 
-td, rd, l, d, v = load_binary_ethernet_file("tbdata/arp_request.bin")
-test_data+=td
-read_data+=rd
-read_last+=l
-read_delay+=d
-test_valid+=v
+
+for i in range(2):
+    td, rd, l, d, v = load_binary_ethernet_file("tbdata/arp_request.bin")
+    print("Length of test data", len(rd))
+    test_data+=td
+    read_data+=rd
+    read_last+=l
+    read_delay+=d
+    test_valid+=v
 
 #tbdat = open("tbdata/arp_request.bin", 'rb')
 #dat = tbdat.read()
@@ -78,7 +81,8 @@ def test_axi4s_ethernet_frame_check():
 
     axi4s_ethernet_valid_framer_inst = axi4s_ethernet_valid_framer(reset, clk, rxdata, rx_dv, framed)
     axi4s_ethernet_frame_check_inst = axi4s_ethernet_frame_check(reset, clk,framed, checked, frame_valid, frameLength)
-    axi4s_packet_fifo_inst = axi4s_packet_fifo(reset, clk, checked, discard, valids, 2048)
+    packetLength = Signal(intbv(0)[16:])
+    axi4s_packet_fifo_inst = axi4s_packet_fifo(reset, clk, checked, discard, valids, packetLength, 2048)
     
     @always_comb
     def comb():
@@ -111,6 +115,8 @@ def test_axi4s_ethernet_frame_check():
         yield reset.negedge
         #valids.ready.next = 1
         yield tbReceiveSequence(clk, valids, read_data, read_last, read_delay);
+        for i in range(10):
+            yield clk.posedge
         raise StopSimulation("Simulation ended successfully")
 
 

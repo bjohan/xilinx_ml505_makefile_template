@@ -1,8 +1,6 @@
 from myhdl import *
 
 from interface_axi4s import Axi4sInterface
-from component_dpbram_fifo import dpbram_fifo
-from component_axi4s_skidbuf import axi4s_skidbuf
 
 @block
 def axi4s_ethernet_frame_check(reset, clk, i, o, valid, frameLength):
