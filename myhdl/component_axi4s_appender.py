@@ -4,9 +4,7 @@ from component_axi4s_skidbuf import axi4s_skidbuf
 t_State = enum('S_TRANSFER', 'S_APPEND');
 
 @block
-def axi4s_appender(reset, clk, 
-        tDataIn, tValidIn, tReadyOut_o, tLastIn,
-        tDataOut, tValidOut_o, tReadyIn, tLastOut,
+def axi4s_appender(reset, clk, i, o, 
         app):
 
     tReadyOut = Signal(False)
@@ -15,32 +13,32 @@ def axi4s_appender(reset, clk,
     state = Signal(t_State.S_TRANSFER)
 
     transfer = Signal(True)
-    num = Signal(intbv(0, min = 0, max = len(app)/len(tDataIn)+1));
-    tValidInt = Signal(False)
+    num = Signal(intbv(0, min = 0, max = len(app)/len(i.data)+1));
+    ivalidt = Signal(False)
 
-    numWords = Signal(intbv(int(len(app)/len(tDataIn)))[8:])
+    numWords = Signal(intbv(int(len(app)/len(i.data)))[8:])
     isLast = Signal(False)
  
     @always_comb
     def out_reg():
-        tValidOut_o.next = tValidOut
-        tReadyOut_o.next = tReadyOut
-        transferOut.next = tValidOut and tReadyIn
+        o.valid.next = tValidOut
+        i.ready.next = tReadyOut
+        transferOut.next = tValidOut and o.ready
         isLast.next = ((num+1) == numWords)
 
     @always_comb
     def bypass_transfer():
         if transfer:
-            tDataOut.next = tDataIn;
-            tValidOut.next = tValidIn;
-            tLastOut.next = 0
-            tReadyOut.next = tReadyIn;
+            o.data.next = i.data;
+            tValidOut.next = i.valid;
+            o.last.next = 0
+            tReadyOut.next = o.ready;
             
         else:
             tReadyOut.next = 0
-            tDataOut.next = app[(num+1)*len(tDataIn):num*len(tDataIn)]
-            tValidOut.next = tValidInt
-            tLastOut.next = isLast
+            o.data.next = app[(num+1)*len(i.data):num*len(i.data)]
+            tValidOut.next = ivalidt
+            o.last.next = isLast
         
 
     @always_seq(clk.posedge, reset=reset)
@@ -48,16 +46,16 @@ def axi4s_appender(reset, clk,
         if state == t_State.S_TRANSFER:
             transfer.next = 1
             num.next = 0
-            if transferOut and tLastIn:
+            if transferOut and i.last:
                     state.next = t_State.S_APPEND
                     transfer.next = 0
-                    tValidInt.next = 1
+                    ivalidt.next = 1
         if state == t_State.S_APPEND:
             if transferOut:
                 if isLast:
                     state.next = t_State.S_TRANSFER
                     transfer.next = 1
-                    tValidInt.next = 0
+                    ivalidt.next = 0
                 num.next = num+1
         
     return logic, out_reg, bypass_transfer

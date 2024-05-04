@@ -1,22 +1,17 @@
 from myhdl import *
 
+from interface_axi4s import Axi4sInterface
 from component_escaper import escaper
 
 def convert_escaper(hdl):
     clk = Signal(False)
     reset = ResetSignal(False, active=1, isasync=False)
     
-    tDataIn = Signal(intbv(0xAA)[8:])
-    tValidIn = Signal(False)
-    tReadyOut = Signal(False)
-    tLastIn = Signal(False)
-    
-    tDataOut = Signal(intbv(0)[8:])
-    tValidOut = Signal(False)
-    tReadyIn = Signal(False)
-    tLastOut = Signal(False)
+    i = Axi4sInterface(8)
+    o = Axi4sInterface(8)
 
-    escaper_inst = escaper(reset, clk, tDataIn, tValidIn, tReadyOut, tLastIn, tDataOut, tValidOut, tReadyIn, tLastOut, 0x10)
+    escaper_inst = escaper(reset, clk, i, o, 0x10)
+
     escaper_inst.convert(hdl=hdl);
 
 

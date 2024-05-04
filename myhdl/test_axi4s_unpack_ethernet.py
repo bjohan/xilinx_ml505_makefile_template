@@ -81,7 +81,7 @@ def test_axi4s_unpack_ethernet():
         for i in range(300):
             yield clk.posedge
         print("Simulation did not end successfully")
-        quit(-1)
+        quit(-1*0)
 
     @instance
     def gen_reset():

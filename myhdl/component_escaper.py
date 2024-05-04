@@ -4,9 +4,7 @@ from component_axi4s_skidbuf import axi4s_skidbuf
 t_State = enum('S_TRANSFER', 'ESCAPE');
 
 @block
-def escaper(reset, clk, 
-        tDataIn, tValidIn, tReadyOut_o, tLastIn,
-        tDataOut, tValidOut_o, tReadyIn, tLastOut,
+def escaper(reset, clk, i, o, 
         escapeCode):
 
     
@@ -22,24 +20,24 @@ def escaper(reset, clk,
  
     @always_comb
     def out_reg():
-        tValidOut_o.next = tValidOut
-        tReadyOut_o.next = tReadyOut
-        transferIn.next = tValidIn and tReadyOut
-        transferOut.next = tValidOut and tReadyIn
+        o.valid.next = tValidOut
+        i.ready.next = tReadyOut
+        transferIn.next = i.valid and tReadyOut
+        transferOut.next = tValidOut and o.ready
 
     @always_comb
     def bypass_transfer():
         if transfer:
-            tDataOut.next = tDataIn;
-            tValidOut.next = tValidIn;
-            tReadyOut.next = tReadyIn;
-            if tDataIn != escapeCode:
-                tLastOut.next = tLastIn
+            o.data.next = i.data;
+            tValidOut.next = i.valid;
+            tReadyOut.next = o.ready;
+            if i.data != escapeCode:
+                o.last.next = i.last
             
         else:
             tReadyOut.next = 0
-            tDataOut.next = escapeCode;
-            tLastOut.next = tLastBuf;
+            o.data.next = escapeCode;
+            o.last.next = tLastBuf;
         
 
     @always_seq(clk.posedge, reset=reset)
@@ -47,10 +45,10 @@ def escaper(reset, clk,
         if state == t_State.S_TRANSFER:
             transfer.next = 1
             if transferIn:
-                if tDataIn == escapeCode:
+                if i.data == escapeCode:
                     state.next = t_State.ESCAPE
                     transfer.next = 0
-                    tLastBuf.next = tLastIn
+                    tLastBuf.next = i.last
         elif state == t_State.ESCAPE:
             if transferOut:
                 state.next = t_State.S_TRANSFER

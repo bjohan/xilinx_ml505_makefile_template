@@ -7,9 +7,7 @@ t_State = enum('S_TRANSFER', 'S_APPEND');
 from interface_axi4s import Axi4sInterface
 
 @block
-def axi4s_dle_encoder(reset, clk, 
-        tDataIn, tValidIn, tReadyOut, tLastIn,
-        tDataOut, tValidOut, tReadyIn, tLastOut):
+def axi4s_dle_encoder(reset, clk, i, o):
 
     escaped = Axi4sInterface(8);    
     pre = Axi4sInterface(8);    
@@ -17,19 +15,9 @@ def axi4s_dle_encoder(reset, clk,
     prependData = Signal(intbv(0x02C0)[16:])
     appendData = Signal(intbv(0x03C0)[16:])
 
-
-    escape_inst = escaper(reset, clk, 
-        tDataIn, tValidIn, tReadyOut, tLastIn, 
-        escaped.data, escaped.valid, escaped.ready, escaped.last,
-        0xc0)
-
+    escape_inst = escaper(reset, clk, i, escaped, 0xc0)
     prepend_inst = axi4s_prepender(reset, clk,  escaped, pre, prependData)
-
-    
-    append_inst = axi4s_appender(reset, clk, 
-        pre.data, pre.valid, pre.ready, pre.last,
-        tDataOut, tValidOut, tReadyIn, tLastOut,
-        appendData)
+    append_inst = axi4s_appender(reset, clk, pre, o, appendData)
 
         
     return escape_inst, prepend_inst, append_inst
