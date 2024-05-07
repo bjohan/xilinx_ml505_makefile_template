@@ -117,7 +117,7 @@ Definition:
 |app | data to be appended. Must be multiple length of i.data|
 
 ## axi4s_prepender
-Prepend one or more words to the end of a stream.
+Prepend one or more words to the end of a stream.  
 
 Definition:  
 ``axi4s_prepender(reset, clk, i, o, prep)``  
@@ -134,9 +134,9 @@ Definition:
 
 
 ## axi4s_dle_encoder
-Encodes axi stream using ascii code DLE with DLE STX in beginning and DLE ETX in end. the stream content is then escaped with DLE. In this way frames can be recovered after last signal is removed.
+Encodes axi stream using ascii code DLE with DLE STX in beginning and DLE ETX in end. the stream content is then escaped with DLE. In this way frames can be recovered after last signal is removed.  
 
-Definition:
+Definition:  
 ``axi4s_dle_encoder(reset, clk, i, o)``  
 
 
@@ -151,8 +151,8 @@ Definition:
 
 
 ## axi4s_last_escaper
-adds escape sequences when escape character occurs in stream. Adds `esc end` at the end of the stream to mark end of frame.
-Definition:
+adds escape sequences when escape character occurs in stream. Adds `esc end` at the end of the stream to mark end of frame.  
+Definition:  
 ``axi4s_last_escaper(reset, clk, i, o, esc, end)``  
 
 
@@ -168,8 +168,8 @@ Definition:
 |end| symbol to be escaped to mark end of stream|
 
 ## axi4s_last_deescaper
-Deescapes escaped stream and sets last for the word after `esc end` sequence in stream.
-Definition:
+Deescapes escaped stream and sets last for the word after `esc end` sequence in stream.  
+Definition:  
 ``axi4s_last_deescaper(reset, clk, i, o, frameError, esc, end)``  
 
 
@@ -185,6 +185,60 @@ Definition:
 |esc| symbol used as escape character|
 |end| symbol to be escaped to mark end of stream|
 
+## axi4s_head_unpacker
+Unpack the head of an axi stream, then when head has been handshaked the tail is transfered to ouput port.
+
+Definition:  
+``axi4s_head_unpacker(reset, clk, i, tail_out, out_regs_o, out_valid_o, readyIn, words)``  
+
+<p>&nbsp;</p>
+
+|Name | Function |
+|:--|:--|
+|reset| reset |
+|clk| clock|
+|i | input stream |
+|tail_out | output stream, part that was not in header|
+|regs_out_o| unpacked head of stream. Length must be multiple of i.data| 
+|out_valid_o| high when regs_out_o is valid|
+|readyIn| assert while out_valid_o is high to handshake a read|
+|words| number of words received, to check if entire header was received|
 
 
+## axi4s_packer
+Pack a word in to an axi4s lite stream.
 
+
+Definition:  
+``axi4s_packer(reset, clk, o, in_regs, in_valid ,in_ready_o, txOne)``  
+
+<p>&nbsp;</p>
+
+|Name | Function |
+|:--|:--|
+|reset| reset |
+|clk| clock|
+|o | output stream |
+|in_regs | registers to be packed into stream. Length must be multiple of o.data length|
+|in_valid| valid high at the same time as packer asserts in_ready_o handshakes transfer.| 
+|in_ready_o| high when packer is ready|
+|txOne| transmit only the len(o.data) bits in in_regs |
+
+## axi4s_unpacker
+Unpacks an entire axi4s lite stream into a wide register.  
+
+Definition:  
+``axi4s_unpacker(reset, clk, i, out_regs_o, out_valid_o, readyIn, words, tooLong)``  
+
+<p>&nbsp;</p>
+
+|Name | Function |
+|:--|:--|
+|reset| reset |
+|clk| clock|
+|i | input stream |
+|regs_out_o| unpacked head of stream. Length must be multiple of i.data| 
+|out_valid_o| high when regs_out_o is valid|
+|readyIn| assert while out_valid_o is high to handshake a read|
+|words| number of words received, to check if entire header was received|
+|tooLong| asserted if stream was longer than regs_out_o|
