@@ -242,3 +242,22 @@ Definition:
 |readyIn| assert while out_valid_o is high to handshake a read|
 |words| number of words received, to check if entire header was received|
 |tooLong| asserted if stream was longer than regs_out_o|
+
+## axi4s_switch
+Two port mux for axi streams. toA and toB are read when i.valid is asserted. transfer will not begin until exactly one of toA or toB is asserted   
+
+Definition:  
+``axi4s_switch(reset, clk, i, oa, ob, toA, toB)``  
+
+<p>&nbsp;</p>
+
+|Name | Function |
+|:--|:--|
+|reset| reset |
+|clk| clock|
+|i | input stream |
+|oa| if toA is asserted stream input will be connected to this port|
+|ob| if toB is asserted stream input will be connected to this port|
+|toA| assert to connect stream to A port|
+|toB| assert to connect stream to B port|
+
