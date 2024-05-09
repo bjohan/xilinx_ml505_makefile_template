@@ -261,3 +261,18 @@ Definition:
 |toA| assert to connect stream to A port|
 |toB| assert to connect stream to B port|
 
+## axi4s_merge
+Two port merge for axi streams. Inputs a and be are checked alternately and serviced in turn if data is present on both streams.
+
+Definition:  
+``axi4s_merge(reset, clk, ia, ib, o)``  
+
+<p>&nbsp;</p>
+
+|Name | Function |
+|:--|:--|
+|reset| reset |
+|clk| clock|
+|ia | input stream a |
+|ib | input stream b |
+|o| framse from both inpus are connected to this output|
