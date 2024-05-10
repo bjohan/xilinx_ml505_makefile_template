@@ -12,10 +12,11 @@ def axi4s_prepender(reset, clk, i, o, prep):
     state = Signal(t_State.S_IDLE)
 
     transfer = Signal(False)
-    num = Signal(intbv(0, min = 0, max = len(prep)/len(i.data)+1));
+    num = Signal(intbv(0, min = 0, max = len(prep)/len(i.data)+1+1));
     intValidOut = Signal(False)
     tLastOut = Signal(False)
-    prepData = Signal(modbv(0)[len(prep):])
+    prepData = Signal(modbv(0)[len(prep)+ww:])
+    firstlast = Signal(False)
  
     @always_comb
     def out_reg():
@@ -33,17 +34,24 @@ def axi4s_prepender(reset, clk, i, o, prep):
             tReadyOut.next = o.ready;
             
         else:
-            tReadyOut.next = 0
+            if state == t_State.S_IDLE:
+                tReadyOut.next = 1
+            else:
+                tReadyOut.next = 0
             o.data.next = prepData[ww:]
             tValidOut.next = intValidOut
-            tLastOut.next = 0
+            if num == len(prep)//ww:
+                tLastOut.next = firstlast
+            else:
+                tLastOut.next = 0
         
 
     @always_seq(clk.posedge, reset=reset)
     def logic():
         if state == t_State.S_IDLE:
             if i.valid == 1:
-                prepData.next = prep
+                prepData.next = prep+(i.data<<len(prep))
+                firstlast.next = i.last
                 intValidOut.next = 1
                 state.next = t_State.S_PREPEND
                 num.next = 0
@@ -51,9 +59,15 @@ def axi4s_prepender(reset, clk, i, o, prep):
         if state == t_State.S_PREPEND:
             if transferOut:
                 prepData.next = prepData >> ww
-                if num == len(prep)/len(i.data)-1:
-                    state.next = t_State.S_TRANSFER
-                    transfer.next = 1
+                if num == len(prep)//len(i.data):
+                    if firstlast:
+                        state.next = t_State.S_IDLE
+                        num.next = 0
+                        firstlast.next = 0
+                        intValidOut.next = 0
+                    else:
+                        state.next = t_State.S_TRANSFER
+                        transfer.next = 1
                 num.next = num+1
         if state == t_State.S_TRANSFER:
             if transferOut:
