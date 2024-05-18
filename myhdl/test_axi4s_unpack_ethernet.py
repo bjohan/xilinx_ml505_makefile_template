@@ -5,9 +5,9 @@ from component_axi4s_unpack_ethernet import axi4s_unpack_ethernet
 import struct
 
 test_data =     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3, 0xaa, 0xbb, 0xcc]
-read_data =     []
-read_last =     []
-read_delay =    []
+read_data =     [0x08, 0x06]
+read_last =     [0,    0]
+read_delay =    [0,    0]
 
 test_valid=     [1,    0,    1,    1,    1,    0,    0,    1,    1,    1,    1,    0,    0,    0,    0]
 
@@ -41,11 +41,13 @@ for i in range(1):
     td, rd, l, d, v = load_binary_ethernet_file("tbdata/arp_request.bin")
     print("Length of test data", len(rd))
     test_data+=td
-    read_data+=rd
-    read_last+=l
-    read_delay+=d
+    read_data+=rd[15:-4]
+    read_last+=l[15:len(rd[:-4])]
+    read_last[-1]=1
+    read_delay+=d[15:-4]
     test_valid+=v
-
+print(len(read_data), read_data)
+print(len(read_last), read_last)
 @block
 def test_axi4s_unpack_ethernet():
     clk = Signal(False)
@@ -94,13 +96,14 @@ def test_axi4s_unpack_ethernet():
     @instance
     def read():
         yield reset.negedge
-        payload.valid.next = 1
+        headerReady.next=1
+        #payload.ready.next = 1
         #valids.ready.next = 1
         #print("done")
-        #yield tbReceiveSequence(clk, valids, read_data, read_last, read_delay);
+        yield tbReceiveSequence(clk, payload, read_data, read_last, read_delay);
         #for i in range(10):
         #    yield clk.posedge
-        #raise StopSimulation("Simulation ended successfully")
+        raise StopSimulation("Simulation ended successfully")
 
     @instance
     def write():

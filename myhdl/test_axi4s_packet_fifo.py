@@ -8,17 +8,17 @@ test_delay_in = [1,    0,    0,    0,    0,    0,    3,    0,    0,    0,    0, 
 test_delay_out =[1,    2,    3,    1,    0,    0,    3,    0,    0,    0,    0,    0]
 
 test_data +=     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]
-test_last +=     [0,    0,    0,    0,    0,    0,    0,    1,    0,    0,    0,    1]
-test_delay_in += [1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1]
-test_delay_out +=[1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1]
+test_last +=     [0,    0,    0,    0,    0,    0,    0,    1,    1,    1,    0,    1]
+test_delay_in += [0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0]
+test_delay_out +=[0,    0,    0,    1,    0,    0,    0,    0,    0,    0,    0,    0]
 
 test_data +=     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]
 test_last +=     [0,    0,    0,    0,    0,    0,    0,    1,    0,    0,    0,    1]
 test_delay_in += [1,    1,    1,    1,    1,    1,    1,    0,    1,    1,    0,    0]
 test_delay_out +=[1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1]
 
-test_data +=     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3]
-test_last +=     [0,    0,    0,    0,    0,    0,    0,    1,    0,    0,    0,    1]
+test_data +=     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xD3]
+test_last +=     [1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0,    1]
 test_delay_in += [1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1]
 test_delay_out +=[1,    1,    1,    1,    1,    1,    0,    1,    1,    1,    0,    0]
 

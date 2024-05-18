@@ -14,13 +14,12 @@ def convert_axi4s_pack_ethernet(hdl):
     sfd = Signal(modbv(0)[8:])
     dst = Signal(modbv(0)[48:])
     src = Signal(modbv(0)[48:])
-    etherType = Signal(modbv(0)[16:])
 
     headerValid = Signal(True)
     headerReady = Signal(True)
 
 
-    axi4s_pack_ethernet_inst = axi4s_pack_ethernet(reset, clk, valids, payload, sfd, dst, src, etherType, headerValid, headerReady)
+    axi4s_pack_ethernet_inst = axi4s_pack_ethernet(reset, clk, valids, payload, sfd, dst, src, headerValid, headerReady)
 
     axi4s_pack_ethernet_inst.convert(hdl=hdl);
 

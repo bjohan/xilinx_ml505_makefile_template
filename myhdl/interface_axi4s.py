@@ -42,7 +42,6 @@ def tbReceive(clk, bus, data, last, delay):
         quit(-1)
     if last != bus.last:
         print("Last bit does not match when transfering", data, ". Got", bus.last, "expected", last)
-        yield clk.posedge
         quit(-1)
     bus.ready.next = 0
 

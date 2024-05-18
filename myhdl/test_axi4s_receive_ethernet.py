@@ -3,12 +3,12 @@ from interface_axi4s import Axi4sInterface, tbTransmitSequence, tbReceiveSequenc
 from component_axi4s_receive_ethernet import axi4s_receive_ethernet
 import struct
 
-test_data =     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3, 0xaa, 0xbb, 0xcc]
+test_data =     []
 read_data =     []
 read_last =     []
 read_delay =    []
 
-test_valid=     [1,    0,    1,    1,    1,    0,    0,    1,    1,    1,    1,    0,    0,    0,    0]
+test_valid=     []
 
 
 def load_binary_ethernet_file(fn):
@@ -44,6 +44,12 @@ for i in range(1):
     read_last+=l
     read_delay+=d
     test_valid+=v
+    read_last = [0]*(len(read_data)-4)
+    read_last[-1]=1
+    read_delay = read_delay[:-4]
+    read_data = read_data[:-4]
+    print(read_last)
+    print(read_data)
 
 @block
 def test_axi4s_receive_ethernet():

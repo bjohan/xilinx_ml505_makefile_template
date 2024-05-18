@@ -74,32 +74,11 @@ def test_axi4s_pack_ethernet():
     ethernetHeaderReady = Signal(True)
 
 
-    #ARP frame signals
-    hardware_type = Signal(modbv(0)[16:])
-    protocol_type = Signal(modbv(0)[16:])
-    hardware_size = Signal(modbv(0)[8:])
-    protocol_size = Signal(modbv(0)[8:])
-    opcode = Signal(modbv(0)[16:])
-    sender_mac = Signal(modbv(0)[48:])
-    sender_ip = Signal(modbv(0)[32:])
-    target_mac = Signal(modbv(0)[48:])
-    target_ip = Signal(modbv(0)[32:])
-
-    arpHeaderValid = Signal(True)
-    arpHeaderReady = Signal(True)
-
-
-
     packetLength = Signal(intbv(0)[16:])
     axi4s_receive_ethernet_inst = axi4s_receive_ethernet(reset, clk, rxdata, rx_dv, valids, packetLength)
     axi4s_unpack_ethernet_inst = axi4s_unpack_ethernet(reset, clk, valids, ethernetPayload, sfd, dst, src, etherType, ethernetHeaderValid, ethernetHeaderReady)
     
-    axi4s_unpack_arp_inst = axi4s_unpack_arp(reset, clk, ethernetPayload, arpPayload, hardware_type, protocol_type, hardware_size, protocol_size, opcode, 
-                                                                            sender_mac, sender_ip, target_mac, target_ip, arpHeaderValid, arpHeaderReady)
-
-    axi4s_pack_arp_inst = axi4s_pack_arp(reset, clk, arpGenerated, hardware_type, protocol_type, hardware_size, protocol_size, opcode,
-                                                    sender_mac, sender_ip, target_mac, target_ip, arpHeaderValid, arpHeaderReady); 
-    axi4s_pack_ethernet_inst = axi4s_pack_ethernet(reset, clk, arpGenerated, ethernetGenerated, sfd, dst, src, etherType, ethernetHeaderValid, ethernetHeaderReady)
+    axi4s_pack_ethernet_inst = axi4s_pack_ethernet(reset, clk, ethernetPayload, ethernetGenerated, sfd, dst, src, ethernetHeaderValid, ethernetHeaderReady)
 
     @always(delay(10))
     def clkgen():
@@ -141,7 +120,7 @@ def test_axi4s_pack_ethernet():
             rxdata.next = d
             yield clk.posedge
 
-    return clkgen, gen_reset, monitor, axi4s_receive_ethernet_inst, axi4s_unpack_ethernet_inst, axi4s_unpack_arp_inst, axi4s_pack_arp_inst, axi4s_pack_ethernet_inst, write, read
+    return clkgen, gen_reset, monitor, axi4s_receive_ethernet_inst, axi4s_unpack_ethernet_inst, axi4s_pack_ethernet_inst, write, read
 
 
 
