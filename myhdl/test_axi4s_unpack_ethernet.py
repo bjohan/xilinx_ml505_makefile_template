@@ -5,9 +5,9 @@ from component_axi4s_unpack_ethernet import axi4s_unpack_ethernet
 import struct
 
 test_data =     [0xA0, 0xA1, 0xA2, 0xA3, 0xB0, 0xB1, 0xB2, 0xB3, 0xC0, 0xC1, 0xC2, 0xC3, 0xaa, 0xbb, 0xcc]
-read_data =     [0x08, 0x06]
-read_last =     [0,    0]
-read_delay =    [0,    0]
+read_data =     []
+read_last =     []
+read_delay =    []
 
 test_valid=     [1,    0,    1,    1,    1,    0,    0,    1,    1,    1,    1,    0,    0,    0,    0]
 

@@ -10,10 +10,8 @@ def axi4s_unpack_ethernet(reset, clk, i, o, sfd, dst, src, etherType, valid, rea
     etherTyper = Signal(modbv(0)[16:]) 
     numWords = Signal(intbv(0)[16:])
     header = Signal(modbv(0)[8*(1+2*6+2):])
-    b = Axi4sInterface(8)
 
-    axi4s_head_unpacker_inst = axi4s_head_unpacker(reset, clk, i, b, header, valid, ready, numWords)
-    axi4s_prepender_inst = axi4s_prepender(reset, clk, b, o, etherTyper)
+    axi4s_head_unpacker_inst = axi4s_head_unpacker(reset, clk, i, o, header, valid, ready, numWords)
 
     @always_comb
     def comb():
@@ -23,4 +21,4 @@ def axi4s_unpack_ethernet(reset, clk, i, o, sfd, dst, src, etherType, valid, rea
         etherType.next = header[120:104]
         etherTyper.next = header[120:104]
 
-    return comb, axi4s_head_unpacker_inst, axi4s_prepender_inst
+    return comb, axi4s_head_unpacker_inst
