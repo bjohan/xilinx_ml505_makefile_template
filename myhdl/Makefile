@@ -22,7 +22,7 @@ $(PYTHON):
 	pyenv/bin/pip install getchar
 	pyenv/bin/pip install bitstring
 
-.DELETE_ON_ERROR:
+#.DELETE_ON_ERROR:
 
 test_%.vcd: test_%.py component_%.py $(PYTHON)
 	$(PYTHON) $<

@@ -92,6 +92,10 @@ def test_axi4s_pack_ethernet():
         for i in range(300):
             yield clk.posedge
         print("Simulation did not end successfully")
+        yield clk.posedge
+        yield clk.posedge
+        yield clk.posedge
+        yield clk.posedge
         quit(-1*0)
 
     @instance
